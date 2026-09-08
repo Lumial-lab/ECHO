@@ -78,6 +78,10 @@ def _state(dag: str) -> dict[str, dict]:
                 n["status"], n["by"] = "in_progress", e.get("by")
             elif t == "done":
                 n["status"], n["proof"] = "proved", e.get("proof")
+            elif t == "candidate_done":
+                # Рій/агент ПРОПОНУЄ рішення; done ставить лише субʼєкт-воротар.
+                # Старі читачі журналу цю подію безпечно ігнорують.
+                n["status"], n["proof"] = "candidate", e.get("proof")
             elif t == "fail":
                 n["attempts"].append({"by": e.get("by"), "why": e.get("why"), "ts": e["ts"]})
                 n["status"], n["by"] = "open", None      # вузол знову вільний, СПРОБА ЛИШАЄТЬСЯ
@@ -111,10 +115,11 @@ def main() -> int:
 
     p = sub.add_parser("add"); p.add_argument("dag"); p.add_argument("kind", choices=["claim", "question", "decision", "lesson"])
     p.add_argument("title"); p.add_argument("--desc", default=""); p.add_argument("--deps", default=""); p.add_argument("--id", default="")
-    for c in ("take", "done", "fail", "refute", "note", "priority"):
+    for c in ("take", "done", "candidate_done", "fail", "refute", "note", "priority"):
         p = sub.add_parser(c); p.add_argument("dag"); p.add_argument("id")
         if c == "take": p.add_argument("--by", required=True)
-        if c == "done": p.add_argument("--proof", required=True)
+        if c in ("done", "candidate_done"): p.add_argument("--proof", required=True)
+        if c == "candidate_done": p.add_argument("--by", default="roy")
         if c in ("fail", "refute"): p.add_argument("--why", required=True); p.add_argument("--by", default="")
         if c == "note": p.add_argument("--text", required=True)
         if c == "priority": p.add_argument("--value", required=True)
@@ -128,7 +133,7 @@ def main() -> int:
         _append(a.dag, {"event": "add", "id": nid, "kind": a.kind, "title": a.title,
                         "desc": a.desc, "deps": deps})
         print(f"додано {nid}: {a.title}")
-    elif a.cmd in ("take", "done", "fail", "refute", "note", "priority"):
+    elif a.cmd in ("take", "done", "candidate_done", "fail", "refute", "note", "priority"):
         ev = {"event": a.cmd, "id": a.id}
         for k in ("by", "proof", "why", "text", "value"):
             if hasattr(a, k) and getattr(a, k):
@@ -137,7 +142,7 @@ def main() -> int:
         print(f"{a.cmd} → {a.id}")
     elif a.cmd == "status":
         nodes = _state(a.dag)
-        order = ["ready", "in_progress", "blocked", "contested", "refuted", "proved"]
+        order = ["ready", "in_progress", "candidate", "blocked", "contested", "refuted", "proved"]
         for st in order:
             group = [n for n in nodes.values() if n["status"] == st]
             if group:

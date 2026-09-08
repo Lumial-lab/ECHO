@@ -11,3 +11,6 @@
 {"event": "priority", "id": "W1", "value": "P1", "ts": "2026-09-08T09:55:42+03:00"}
 {"event": "note", "id": "W1", "text": "Будувати сьогодні ввечері/вночі (день = сайт); фундамент є: Тінь+радар-цикли (прото-Рій) + syntonia_dag + LiteLLM з ночі Д180", "ts": "2026-09-08T09:55:42+03:00"}
 {"event": "add", "id": "R4", "kind": "claim", "title": "RNRuntime.save переведено на atomic-tmp (pid+uuid) як у save_error_logger", "desc": "зерно з перегляду Д180: збій PermissionError 07.09 18:00 — сутичка прямого запису rn_state.json; лік відомий з Д139, застосувати до самого save", "deps": [], "ts": "2026-09-08T23:02:59+03:00"}
+{"event": "add", "id": "Q4", "kind": "question", "title": "Nested Job Objects на Win10/11: чи можна садити probe у job, коли launcher уже сидить у своєму job", "desc": "[auto] Невиміряне твердження з мого ревю Ейденові (Д181): на Win8+ вкладені job objects працюють. Потрібно: точні правила вкладеності, обмеження KILL_ON_JOB_CLOSE у вкладених job, підводні камені, мінімальний тест-план. Джерела: Microsoft docs, Raymond Chen.", "deps": [], "ts": "2026-09-09T01:31:38+03:00"}
+{"event": "take", "id": "Q4", "by": "roy", "ts": "2026-09-09T01:31:47+03:00"}
+{"event": "candidate_done", "id": "Q4", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\Q4_20260909_013207.md", "ts": "2026-09-09T01:32:07+03:00"}
