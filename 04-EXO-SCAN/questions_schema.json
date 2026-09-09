@@ -1,0 +1,197 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "exo-scan-questions-v0.1",
+  "title": "EXO Scan — схема питань",
+  "description": "Визначає структуру questions.json. Самі питання, ваги й пороги заповнюють Люміаль і Аетрем — це їхня методологія.",
+  "type": "object",
+  "required": ["scoring_version", "screens", "axes", "digital_substrate_levels"],
+  "properties": {
+    "scoring_version": {
+      "type": "string",
+      "description": "Версія методики. Записується в КОЖЕН результат для порівнянності у часі.",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "examples": ["0.1.0"]
+    },
+    "axes": {
+      "type": "array",
+      "description": "Вісі радару (за брифом — 8 штук). Кожна має шкалу 0-4.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "description"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z_]+$" },
+          "label": { "type": "string", "description": "Назва вісі українською, зрозумілою мовою" },
+          "description": { "type": "string", "description": "Що ця вісь вимірює (1-2 речення)" },
+          "min_questions_for_score": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Мінімальна кількість відповідей для виставлення балу. Менше → стан '⚪ недостатньо даних'."
+          }
+        }
+      }
+    },
+    "digital_substrate_levels": {
+      "type": "array",
+      "description": "Рівні цифрового субстрату D0-D4 з брифу.",
+      "items": {
+        "type": "object",
+        "required": ["level", "code", "label", "description"],
+        "properties": {
+          "level": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "code": { "type": "string", "enum": ["D0", "D1", "D2", "D3", "D4"] },
+          "label": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "screens": {
+      "type": "array",
+      "description": "Екрани опитування (за брифом ~10). Порядок = порядок показу.",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "questions"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string", "description": "Заголовок екрану українською" },
+          "show_if": {
+            "$ref": "#/$defs/condition",
+            "description": "Умова показу екрану. Якщо відсутня — показується завжди."
+          },
+          "questions": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/question" }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "condition": {
+      "description": "Умова розгалуження. Підтримує прості порівняння і логічні оператори.",
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["question_id", "op", "value"],
+          "properties": {
+            "question_id": { "type": "string" },
+            "op": { "type": "string", "enum": ["eq", "neq", "gt", "gte", "lt", "lte", "in", "not_in", "contains"] },
+            "value": {}
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["and"],
+          "properties": { "and": { "type": "array", "items": { "$ref": "#/$defs/condition" } } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["or"],
+          "properties": { "or": { "type": "array", "items": { "$ref": "#/$defs/condition" } } },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["not"],
+          "properties": { "not": { "$ref": "#/$defs/condition" } },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "question": {
+      "type": "object",
+      "required": ["id", "type", "text"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "description": "Унікальний ідентифікатор питання"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["single_choice", "multi_choice", "scale", "number", "text"],
+          "description": "Тип відповіді. text — мінімум (захист від ін'єкцій: дані, не інструкції)."
+        },
+        "text": {
+          "type": "string",
+          "description": "Текст питання українською, простою мовою"
+        },
+        "hint": {
+          "type": "string",
+          "description": "Необов'язкова підказка під питанням"
+        },
+        "required": {
+          "type": "boolean",
+          "default": true
+        },
+        "show_if": {
+          "$ref": "#/$defs/condition",
+          "description": "Умова показу питання (branching logic)"
+        },
+        "options": {
+          "type": "array",
+          "description": "Варіанти відповідей (для single_choice і multi_choice)",
+          "items": {
+            "type": "object",
+            "required": ["value", "label"],
+            "properties": {
+              "value": { "type": "string" },
+              "label": { "type": "string", "description": "Текст варіанту українською" }
+            }
+          }
+        },
+        "scoring_rules": {
+          "type": "array",
+          "description": "Правила оцінювання: яка відповідь впливає на яку вісь і як.",
+          "items": {
+            "type": "object",
+            "required": ["axis_id", "points"],
+            "properties": {
+              "axis_id": { "type": "string", "description": "ID вісі з axes" },
+              "points": {
+                "description": "Бали або маппінг відповідей на бали",
+                "oneOf": [
+                  { "type": "number" },
+                  {
+                    "type": "object",
+                    "description": "Маппінг: значення відповіді → бали",
+                    "additionalProperties": { "type": "number" }
+                  }
+                ]
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "default": 1.0,
+                "description": "Вага правила (за замовчуванням 1.0)"
+              },
+              "condition": {
+                "$ref": "#/$defs/condition",
+                "description": "Додаткова умова для спрацювання правила (gating)"
+              },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Теги рекомендацій, напр. DIGITAL_FOUNDATION_REQUIRED"
+              }
+            }
+          }
+        },
+        "digital_substrate_rule": {
+          "type": "object",
+          "description": "Вплив відповіді на визначення рівня D0-D4",
+          "properties": {
+            "points": {
+              "oneOf": [
+                { "type": "number" },
+                { "type": "object", "additionalProperties": { "type": "number" } }
+              ]
+            },
+            "weight": { "type": "number", "minimum": 0, "default": 1.0 }
+          }
+        }
+      }
+    }
+  }
+}

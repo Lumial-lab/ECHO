@@ -23,3 +23,5 @@
 {"event": "add", "id": "W9", "kind": "claim", "title": "Кодовий суддя Г1: стенд якості (pytest/ruff/bandit/self-checks) як авто-ворота candidate_verified", "desc": "Зелені тести = верифікований кандидат без моїх очей", "deps": [], "ts": "2026-09-09T03:02:07+03:00"}
 {"event": "take", "id": "W4", "by": "roy", "ts": "2026-09-09T03:03:06+03:00"}
 {"event": "candidate_done", "id": "W4", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\W4_20260909_030335.md", "ts": "2026-09-09T03:03:35+03:00"}
+{"event": "take", "id": "W8", "by": "klavr", "ts": "2026-09-09T03:32:17+03:00"}
+{"event": "done", "id": "W8", "proof": "Lean 4.33.1 встановлено (elan-init); first_proof.lean: 2 теореми ПРИЙНЯТО, хибна ВІДКИНУТА (exit!=0). Суддя Г1 математики живий. mathlib — окремий крок (кілька ГБ, тягнути при першій реальній задачі)", "ts": "2026-09-09T03:32:17+03:00"}
