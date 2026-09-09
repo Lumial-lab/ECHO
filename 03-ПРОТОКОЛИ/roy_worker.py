@@ -43,8 +43,8 @@ BUDGET_F = STATE_DIR / "roy_worker_budget.json"
 LOG_F = STATE_DIR / "roy_worker_log.jsonl"
 LOCK_F = STATE_DIR / "roy_worker.lock"
 
-MAX_PER_RUN = 3      # LLM-викликів за один прохід
-MAX_PER_DAY = 30     # стеля на добу (перезапуски не обнуляють)
+MAX_PER_RUN = 6      # LLM-викликів за один прохід
+MAX_PER_DAY = 150    # стеля на добу — бюджет Люміаль Д181: до $30/міс (~$1/день)
 LOCK_STALE_S = 3600  # протухлий lock ігнорується (захист від вічного клину)
 
 SYSTEM = (
