@@ -44,3 +44,14 @@
 {"event": "candidate_done", "id": "S1", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S1_20260910_004832.md", "ts": "2026-09-10T00:48:32+03:00"}
 {"event": "take", "id": "R6", "by": "klavr", "ts": "2026-09-10T01:42:20+03:00"}
 {"event": "done", "id": "R6", "proof": "Д182 ніч: (1) Klavr Digital Hygiene(1) у _SIGNAL_EXITS body_sense (сигнал не поломка - клас SurfaceGuard); (2) SOS-гістерезис у heartbeat: поріг <=5 + streak>=3 послідовних вимірів (sos_limb_streak.json); вимір після фіксу: 8/12 -> 9/12", "ts": "2026-09-10T01:42:20+03:00"}
+{"event": "done", "id": "W4", "proof": "Концепт валідний: косинусний пошук схожих тверджень запобігає re-exploration. Реалізація має використовувати існуючу KlavrMem infrastructure (nomic-embed-text), а не додавати FAISS окремо. Поріг 0.85 потребує калібрування.", "ts": "2026-09-10T03:20:14+03:00"}
+{"event": "done", "id": "Q4", "proof": "Nested Job Objects підтримуються з Win8+. KILL_ON_JOB_CLOSE при вкладеності — невизначена поведінка, потребує емпіричного тесту (U1). Аналіз коректний, джерела вказані.", "ts": "2026-09-10T03:20:16+03:00"}
+{"event": "done", "id": "S1", "proof": "Коректне позиціювання SupCon/NCA/Triplet проти PCA baseline. NCA O(n²) непрактичний для CPU. Triplet з batch-hard — розумний компроміс. Розблокує S2-S4 для емпіричних тестів.", "ts": "2026-09-10T03:20:19+03:00"}
+{"event": "take", "id": "S2", "by": "roy", "ts": "2026-09-10T03:48:04+03:00"}
+{"event": "candidate_done", "id": "S2", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S2_20260910_034826.md", "ts": "2026-09-10T03:48:26+03:00"}
+{"event": "take", "id": "S3", "by": "roy", "ts": "2026-09-10T03:48:26+03:00"}
+{"event": "candidate_done", "id": "S3", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S3_20260910_034852.md", "ts": "2026-09-10T03:48:52+03:00"}
+{"event": "take", "id": "S2", "by": "klavr", "ts": "2026-09-10T10:11:30+03:00"}
+{"event": "done", "id": "S2", "proof": "artifacts/S2_20260910_034826.md — ПРИЙНЯТО 10:15: критерій чіткий (AE лише якщо PCA дає розмиті кластери І є ресурс на 3x ціну). НОТА воріт: GPU у нас НЕМАЄ — AE-гілка практично малоймовірна, фокус на PCA/SVD+контрастивне дотренування", "ts": "2026-09-10T10:11:30+03:00"}
+{"event": "take", "id": "S3", "by": "klavr", "ts": "2026-09-10T10:11:30+03:00"}
+{"event": "done", "id": "S3", "proof": "artifacts/S3_20260910_034852.md — ПРИЙНЯТО 10:15: суддя Г1 треку = N_r@10>=0.85 + collision<5% + Distance MSE, референсна реалізація numpy+faiss. НОТА-корекція: Рій написав 'Leech (E8)' — це РІЗНІ ґратки (E8=8D, Leech=24D); правильно Leech Λ24", "ts": "2026-09-10T10:11:31+03:00"}
