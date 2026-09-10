@@ -229,7 +229,35 @@ def run_once(dag: str, dry: bool = False) -> int:
             print(f"  ✗ {n['id']} — провайдери мовчать (вузол звільнено, спроба збережена)")
         _budget_spend(1)
     print(f"Рій: прохід завершено, кандидатів: {done_count}.")
+    if done_count:
+        _publish(dag)
     return 0
+
+
+def _publish(dag: str) -> None:
+    """ЗВІТНІСТЬ НА GITHUB (Д182, запит Люміаль для підключення Аетрема):
+    після кожного проходу з кандидатами — свіжа мапа + тихий commit/push
+    журналу графа й артефактів. Помилка мережі НЕ валить робітника."""
+    import subprocess
+    try:
+        subprocess.run([sys.executable, "-X", "utf8", str(HERE / "roy_map.py"),
+                        "--dag", dag], capture_output=True, timeout=60)
+        repo = str(HERE.parent)
+        subprocess.run(["git", "-C", repo, "add",
+                        f"03-ПРОТОКОЛИ/dags/{dag}.dag.jsonl",
+                        "03-ПРОТОКОЛИ/artifacts",
+                        f"03-ПРОТОКОЛИ/roy_map_{dag}.html"],
+                       capture_output=True, timeout=60)
+        r = subprocess.run(["git", "-C", repo, "commit", "-q", "-m",
+                            f"рій: кандидати у {dag} (автозвіт робітника)\n\n"
+                            "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"],
+                           capture_output=True, timeout=60)
+        if r.returncode == 0:
+            subprocess.run(["git", "-C", repo, "push", "-q"],
+                           capture_output=True, timeout=180)
+            _log({"event": "published", "dag": dag})
+    except Exception as e:
+        _log({"event": "publish_fail", "dag": dag, "err": f"{type(e).__name__}"})
 
 
 def main() -> int:
