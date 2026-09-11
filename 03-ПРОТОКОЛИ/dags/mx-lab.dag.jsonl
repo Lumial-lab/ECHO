@@ -85,3 +85,12 @@
 {"event": "priority", "id": "M2", "value": "P1", "ts": "2026-09-11T09:43:30+03:00"}
 {"event": "priority", "id": "M3", "value": "P1", "ts": "2026-09-11T09:43:30+03:00"}
 {"event": "priority", "id": "M4", "value": "P1", "ts": "2026-09-11T09:43:30+03:00"}
+{"event": "take", "id": "S5", "by": "roy", "ts": "2026-09-11T09:48:04+03:00"}
+{"event": "candidate_done", "id": "S5", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S5_20260911_094823.md", "ts": "2026-09-11T09:48:23+03:00"}
+{"event": "note", "id": "S5", "text": "ПРОПОЗИЦІЯ РОЗБИТТЯ від roy (4 під-вузлів) — чекає валідації Клавра, деталі в артефакті", "ts": "2026-09-11T09:48:23+03:00"}
+{"event": "take", "id": "S6", "by": "roy", "ts": "2026-09-11T09:48:23+03:00"}
+{"event": "candidate_done", "id": "S6", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S6_20260911_094843.md", "ts": "2026-09-11T09:48:43+03:00"}
+{"event": "take", "id": "S8", "by": "roy", "ts": "2026-09-11T09:48:43+03:00"}
+{"event": "candidate_done", "id": "S8", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\S8_20260911_094902.md", "ts": "2026-09-11T09:49:02+03:00"}
+{"event": "take", "id": "V1a", "by": "roy", "ts": "2026-09-11T09:49:02+03:00"}
+{"event": "candidate_done", "id": "V1a", "by": "roy/deepseek(OpenRouter)", "proof": "C:\\ЕХО\\03-ПРОТОКОЛИ\\artifacts\\V1a_20260911_094921.md", "ts": "2026-09-11T09:49:21+03:00"}
