@@ -259,9 +259,16 @@ def _publish(dag: str) -> None:
                             "Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"],
                            capture_output=True, timeout=60)
         if r.returncode == 0:
-            subprocess.run(["git", "-C", repo, "push", "-q"],
-                           capture_output=True, timeout=180)
-            _log({"event": "published", "dag": dag})
+            # Д183: GCM з двома акаунтами GitHub відкривав вікно вибору → пуш висів,
+            # робітник тримав lock 45 хв. У фоні промптів бути не може — лише гучний збій.
+            env = dict(os.environ, GCM_INTERACTIVE="never", GIT_TERMINAL_PROMPT="0")
+            p = subprocess.run(["git", "-C", repo, "push", "-q"],
+                               capture_output=True, timeout=120, env=env)
+            if p.returncode == 0:
+                _log({"event": "published", "dag": dag})
+            else:
+                _log({"event": "publish_fail", "dag": dag,
+                      "err": (p.stderr or b"").decode("utf-8", "replace")[-160:]})
     except Exception as e:
         _log({"event": "publish_fail", "dag": dag, "err": f"{type(e).__name__}"})
 
