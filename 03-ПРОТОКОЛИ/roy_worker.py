@@ -202,8 +202,14 @@ def run_once(dag: str, dry: bool = False) -> int:
                      f"{' | '.join(a['why'] for a in n['attempts'][-3:])}\n" if n["attempts"] else ""))
         t0 = time.time()
         result, provider = ask(prompt, system=SYSTEM, want_json=False,
-                               timeout=180, verbose=False)
+                               timeout=180, verbose=False, max_tokens=2500)
         dt = round(time.time() - t0, 1)
+        # Г1 «повнота» (Д183): 4/4 артефакти обрізались на 800 токенах, а помітив я лише
+        # у воротах Г3. Обірвана відповідь (без завершального знака) — позначити явно.
+        if result and str(result).rstrip()[-1:] not in ".!?»)]}`*_|" and len(str(result)) > 1500:
+            result = (str(result) + "\n\n> ⚠ Г1: відповідь виглядає ОБІРВАНОЮ (немає завершального "
+                      "знака) — воротар має переробити або підняти max_tokens.")
+            _log({"event": "truncated", "dag": dag, "id": n["id"], "provider": provider})
         if result:
             art = _write_artifact(n["id"], n["title"], provider or "?", result)
             syntonia_dag._append(dag, {"event": "candidate_done", "id": n["id"],
