@@ -1,0 +1,4 @@
+.secrets/
+трасування/
+__pycache__/
+*.pyc
