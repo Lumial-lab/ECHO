@@ -154,9 +154,11 @@ def run_once(dag: str, dry: bool = False) -> int:
     nodes = syntonia_dag._state(dag)
     _free_stuck(dag, nodes)
     nodes = syntonia_dag._state(dag)  # перечитати після можливих звільнень
+    # Д186: тег [auto] читається і з назви, і з опису (граф biz має його в назвах).
     ready_auto = [n for n in nodes.values()
                   if n["status"] == "ready"
-                  and "[auto]" in n["desc"] and "[auto:off]" not in n["desc"]]
+                  and "[auto]" in (n["title"] + " " + n["desc"])
+                  and "[auto:off]" not in (n["title"] + " " + n["desc"])]
     if not ready_auto:
         _log({"event": "idle", "dag": dag, "reason": "немає ready-вузлів з [auto]"})
         print("Рій: живий, роботи немає (ready+[auto] = 0).")
@@ -204,8 +206,17 @@ def run_once(dag: str, dry: bool = False) -> int:
                   + (f"Минулі невдалі спроби ЦЬОГО вузла (НЕ повторюй): "
                      f"{' | '.join(a['why'] for a in n['attempts'][-3:])}\n" if n["attempts"] else ""))
         t0 = time.time()
+        # Д186 — ДВОЯРУСНИЙ РІЙ (Люмі 14.09: «DeepSeek — для Рою, для мислення заслабка»;
+        # ворота R5c: DeepSeek тримає декомпозицію, 2 з 4 змістовних тверджень хибні).
+        # Думаючий ярус (Kimi K2.6 через OpenRouter) — для вузлів-висновків і для бізнес-графа;
+        # робітник (DeepSeek) — для решти механіки. [cheap] у назві/описі примусово дешевий.
+        tags = n["title"] + " " + n["desc"]
+        tier = ("worker" if "[cheap]" in tags
+                else "think" if (dag == "biz" or n["kind"] in ("claim", "decision") or "[think]" in tags)
+                else "worker")
         result, provider = ask(prompt, system=SYSTEM, want_json=False,
-                               timeout=180, verbose=False, max_tokens=2500)
+                               timeout=240 if tier == "think" else 180, verbose=False,
+                               max_tokens=3500 if tier == "think" else 2500, tier=tier)
         dt = round(time.time() - t0, 1)
         # Г1 «повнота» (Д183): 4/4 артефакти обрізались на 800 токенах, а помітив я лише
         # у воротах Г3. Обірвана відповідь (без завершального знака) — позначити явно.
@@ -279,7 +290,8 @@ def _publish(dag: str) -> None:
 def main() -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser(description="Рій Клавра — робітник DAG (v0.1)")
-    ap.add_argument("--dag", default="mx-lab")
+    ap.add_argument("--dag", default="mx-lab",
+                    help="назва DAG або кілька через кому: mx-lab,biz (Д186: бізнес-граф)")
     ap.add_argument("--once", action="store_true", help="один прохід (для Scheduler)")
     ap.add_argument("--dry", action="store_true", help="показати план без запуску LLM")
     a = ap.parse_args()
@@ -287,7 +299,11 @@ def main() -> int:
         print("Рій: інший робітник уже літає (свіжий lock) — виходжу.")
         return 0
     try:
-        return run_once(a.dag, dry=a.dry)
+        rc = 0
+        for dag in [d.strip() for d in a.dag.split(",") if d.strip()]:
+            print(f"── DAG {dag} ──")
+            rc = max(rc, run_once(dag, dry=a.dry) or 0)
+        return rc
     finally:
         _unlock()
 
