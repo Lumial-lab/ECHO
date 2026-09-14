@@ -91,22 +91,26 @@ def etsy(page, q: str) -> dict:
 
 
 def gumroad(page, q: str) -> dict:
+    """Gumroad discover. Д186 13:20 — ПРИЛАД БРЕХАВ: перший regex ловив «20» з чужого тексту
+    сторінки й видавав за кількість товарів. Чесний лічильник у Gumroad один:
+    «Showing 1-36 of 304 products», а порожній результат — «No products found» (це 0, не unknown)."""
     url = f"https://gumroad.com/discover?query={quote_plus(q)}"
     r = {"source": "gumroad", "query": q, "url": url, "results": "unknown", "prices": [], "note": ""}
     try:
         page.goto(url, wait_until="domcontentloaded", timeout=45000)
-        page.wait_for_timeout(3500)
-        html = page.content()
-        m = re.search(r"([\d,\.]+\+?)\s*(?:results|products)", html, re.I)
+        page.wait_for_timeout(4000)
+        body = page.locator("body").inner_text()
+        m = re.search(r"Showing\s+[\d,]+\s*[-–]\s*[\d,]+\s+of\s+([\d,]+)\s+products", body, re.I)
         if m:
-            r["results"] = m.group(1)
+            r["results"] = int(m.group(1).replace(",", ""))
+        elif re.search(r"No products found", body, re.I):
+            r["results"] = 0
+        else:
+            r["note"] = "лічильник не знайдено (розмітка змінилась?)"
         cards = page.locator("article").count()
+        r["cards_first_page"] = cards
         if cards:
-            r["cards_first_page"] = cards
-        texts = page.locator("article").all_inner_texts()[:24]
-        r["prices"] = _prices(texts)
-        if r["results"] == "unknown" and not cards:
-            r["note"] = "нічого не розпізнано (JS-сторінка або блок)"
+            r["prices"] = _prices(page.locator("article").all_inner_texts()[:36])
     except Exception as e:  # noqa: BLE001
         r["note"] = f"помилка: {type(e).__name__}: {str(e)[:80]}"
     return r
