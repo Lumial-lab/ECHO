@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мапа Рою · biz</title><style>
+ body{font-family:'Segoe UI',system-ui,sans-serif;background:#14191e;color:#dfe6ec;margin:0;padding:28px}
+ h1{font-weight:600;font-size:22px} h1 small{color:#8d97a3;font-weight:400;font-size:14px}
+ .meta{color:#8d97a3;font-size:13px;margin-bottom:18px}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:14px}
+ section{background:#1b2129;border-radius:12px;padding:14px 16px;border-left:4px solid #555}
+ section h2{font-size:14.5px;margin:0 0 2px} section h2 small{color:#8d97a3}
+ .hint{color:#78838f;font-size:11.5px;margin:2px 0 10px}
+ .node{background:#232b34;border-radius:8px;padding:7px 10px;margin:5px 0;font-size:12.5px;line-height:1.45}
+ .node b{color:#ffd479}
+ .deps{color:#6f7c89;font-size:11px;margin-left:6px} .who{color:#7fb4e8;font-size:11px;margin-left:6px}
+ .fails{color:#e88} .auto{background:#2d4a33;color:#9fdbae;border-radius:4px;padding:0 5px;font-size:10.5px;margin-left:5px}
+ .core{border-color:#4caf7d} .cand{border-color:#5b9bd5} .front{border-color:#e0b64f}
+ .edge{border-color:#b08fd8} .wait{border-color:#5a6672} .cont{border-color:#e0884f}
+ .scar{border-color:#d05555} .fog{border-color:#3a3f46;background:#171b20}
+ .strip{margin-top:20px;background:#1b2129;border-radius:12px;padding:14px 16px}
+ .strip h2{font-size:14.5px;margin:0 0 8px} .strip li{font-size:12px;color:#a8b3bf;margin:3px 0}
+ .legend{color:#78838f;font-size:12px;margin-top:16px;line-height:1.7}
+</style></head><body>
+<h1>🐝 Мапа Рою · граф «biz» <small>знімок 15.09.2026 01:36</small></h1>
+<div class="meta">вузлів: 8 · шрамів: 0 (зберігаються назавжди) · туману: 0
+ · мапа = око керування візерунком: python roy_map.py --dag biz</div>
+<div class="grid"><section class="cand"><h2>🔵 КАНДИДАТИ — чекають воріт <small>1</small></h2><p class="hint">Рій пропонує; done ставить лише Клавр</p><div class="node" title="Вихід: таблиця Intent | Searches | Listings | Ratio | Price band | Emotional trigger | Джерело+дата. ЖОДНИХ вигаданих чисел: немає метрики → unknown. Джерела без Etsy-акаунта: публічний пошук Etsy/Gumroad (кількість лістингів, ціни, топ-теги), Google Trends, Reddit/форуми (pain points). Marketplace "><b>B1</b> [auto] Scout: таблиця попиту по 2 лініях — (A) creature-стікери/familiar, (B) micro-kits для мал <span class="who">roy</span><span class="fails">✗1</span></div></section><section class="front"><h2>🟡 ФРОНТ — готове до взяття <small>1</small></h2><p class="hint">залежності виконані</p><div class="node" title="Рамка: ТЗ Аетрема (MX_Business_Lab/Бізнес_Рой/ТЗ для Рою.txt) + його сильніша ставка — micro-intelligence/kits з експертизою Люмі. Мета 14 днів — НЕ $500, а замкнути контур хоча б раз без особистих продажів Люмі. Метрика: хвилини Люмі на артефакт + $ на compute. Бюджет Рою $50–100/30 днів (OpenRoute"><b>B0</b> Спринт «Кормова установка v0.1» — 14 днів: Рій → попит → цифровий товар → marketplace → незнайом </div></section><section class="wait"><h2>⚪ ЧЕКАЄ — залежності не готові <small>6</small></h2><p class="hint"></p><div class="node" title="Вхід: таблиця B1. Вихід: 6–8 кластерів потреб з прикладами запитів і 1 реченням «яку маленьку проблему вирішує продукт». Kill-test Аетрема: «космічна теорія на одному покупцеві» — жодних висновків без ≥3 незалежних сигналів."><b>B2</b> [auto] Anthropologist: кластеризувати НЕ ключові слова, а емоційні/практичні потреби (affection, <span class="deps">← B1</span></div><div class="node" title="Клавр готує 1 сторінку: 5–6 кандидатів з таблицею, ризики IP/claims, оцінка хвилин Люмі на продукт. Люмі ставить 3 галочки. Єдина точка людини до виробництва."><b>B3</b> ВОРОТА ЛЮМІ: обрати 3 мікроніші з B1+B2 — ≤15 хвилин Люмі <span class="deps">← B1, B2</span></div><div class="node" title="Дні 4–7. Персонажі: Blender 5.2 → рендер/fal.ai (той самий конвеєр, що Мурха). Kits: структура + шаблони + чек-листи + промпти; юридичний зміст валідує Люмі (диференціатор ЕХО). Не 15 різних персонажів — 3. Робить Клавр руками + Рій на текстах."><b>B4</b> Designer+Producer: 3 системи (персонаж зі style bible АБО kit зі структурою) × 5 SKU = 15 лістин <span class="deps">← B3</span></div><div class="node" title="Etsy дивиться комплексно: title, tags, attributes, description, перше фото. Без оманливих claims; AI-походження задекларувати за правилами Etsy. Вихід: 15 карток одним файлом для воріт Люмі (IP/естетика/claims/publish)."><b>B5</b> [auto] Merchandiser: title/tags/description/price/preview для 15 лістингів + звірка claims <span class="deps">← B4</span></div><div class="node" title="Дні 8–14, без реклами. 0 impressions → discovery/listing; impressions,0 clicks → концепт/перше фото; clicks,0 fav → desirability; fav,0 sales → ціна/довіра; sale → НЕ масштабувати, перевірити повтор. Памʼять експерименту: hypothesis→demand evidence→asset→listing→exposure→behaviour→purchase→inference"><b>B6</b> [auto] Analyst: щоденний журнал impressions→clicks→favourites→carts→sales; діагноз за деревом Ае <span class="deps">← B5</span></div><div class="node" title="Рішення Люмі + Клавр. Провал теж лишає структуровану памʼять — це і є перший продукт ЕХО: конвеєр із памʼяттю бажання, а не самі няшки."><b>B7</b> Stop/Go на день 14: Kill / Iterate / Go (≥2 незалежних продажі або 1 + сильний сигнал навколо IP <span class="deps">← B6</span></div></section></div>
+<div class="strip"><h2>⚙ Останні дії робітника</h2><ul><li>09-15T01:36 · candidate_done · B1 (kimi-k2.6(OpenRouter), 198.2с)</li></ul></div>
+<div class="legend">Дослідницький режим працює НА МЕЖІ: пріоритет — вузли, суміжні з туманом.
+ Шрами не стираються (~7% доказу Ферма — сліди невдач). done ставить лише Клавр (ворота Г3);
+ стенди і ревізори — ворота Г1-Г2.</div>
+</body></html>
