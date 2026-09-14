@@ -1,0 +1,49 @@
+[
+ {
+  "source": "etsy",
+  "query": "cute reaction stickers digital",
+  "url": "https://www.etsy.com/search?q=cute+reaction+stickers+digital&ref=search_bar",
+  "results": "unknown",
+  "prices": [],
+  "note": "заблоковано/капча",
+  "line": "X",
+  "ts": "2026-09-14T12:28:08"
+ },
+ {
+  "source": "gumroad",
+  "query": "cute reaction stickers digital",
+  "url": "https://gumroad.com/discover?query=cute+reaction+stickers+digital",
+  "results": "6",
+  "prices": [],
+  "note": "",
+  "cards_first_page": 6,
+  "line": "X",
+  "ts": "2026-09-14T12:28:15"
+ },
+ {
+  "source": "etsy",
+  "query": "freelancer contract template",
+  "url": "https://www.etsy.com/search?q=freelancer+contract+template&ref=search_bar",
+  "results": "unknown",
+  "prices": [],
+  "note": "заблоковано/капча",
+  "line": "X",
+  "ts": "2026-09-14T12:28:19"
+ },
+ {
+  "source": "gumroad",
+  "query": "freelancer contract template",
+  "url": "https://gumroad.com/discover?query=freelancer+contract+template",
+  "results": "64",
+  "prices": [
+   47.4,
+   17.9,
+   19.99,
+   17.99
+  ],
+  "note": "",
+  "cards_first_page": 36,
+  "line": "X",
+  "ts": "2026-09-14T12:28:25"
+ }
+]
