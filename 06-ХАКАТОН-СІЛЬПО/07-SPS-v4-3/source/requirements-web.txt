@@ -1,0 +1,6 @@
+requests>=2.32,<3
+starlette>=1.0,<2
+uvicorn>=0.42,<1
+pydantic>=2.12,<3
+httpx>=0.28,<1
+jsonschema>=4.23,<5
