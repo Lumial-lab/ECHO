@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>СПС · План Олени</title><link rel="icon" href="data:,">
+  <link rel="stylesheet" href="agent-demo.css">
+  <script src="assets/lucide.min.js" defer></script><script src="agent-demo.js" defer></script>
+</head>
+<body>
+<header><a href="agent-demo.html" class="brand" aria-label="СПС"><b><span>С</span><span>П</span><span>С</span></b><span>Спільнота покупців<br>супермаркету</span></a><span class="tier">ПОКУПЧИНЯ · ПЕРШИЙ ЯРУС</span><span class="badge">Без купівлі та змін кошика</span></header>
+<main>
+  <section class="brief">
+    <div class="identity"><span class="initial" aria-hidden="true">О</span><div><h1>Олена</h1><p>Покупчиня й учасниця СПС</p></div></div>
+    <p class="fiction">Умовний профіль для демонстрації</p>
+    <label for="request">Планові закупівлі</label>
+    <textarea id="request" rows="5">Сплануй 2 кг картоплі, 1 кг курячого філе та 10 курячих яєць. Бюджет 500 гривень. Нічого не купуй.</textarea>
+    <p class="scope">Картопля · куряче філе · курячі яйця</p>
+    <button id="run"><i data-lucide="sparkles" aria-hidden="true"></i>Підготувати план</button>
+    <button id="recording" class="secondary"><i data-lucide="history" aria-hidden="true"></i>Остання перевірка</button>
+    <div class="mandate"><i data-lucide="shield-check" aria-hidden="true"></i><p><strong>Рішення залишається за Оленою.</strong><br>Цей план не дозволяє оплату чи замовлення.</p></div>
+  </section>
+  <section class="workspace" aria-label="План закупівель">
+    <div class="odarka"><canvas id="odarka-mark" width="120" height="140" aria-hidden="true" style="width:48px;height:56px;flex-shrink:0"></canvas><div><h2>Пані Одарка</h2><p>Знає примхи покупців</p></div></div>
+    <p id="status" role="status" aria-live="polite">Готова опрацювати план Олени.</p>
+    <div id="confirmation" hidden>
+      <h2>Чи правильно розпізнано потреби?</h2>
+      <p id="draft-items" class="parsed"></p><p id="draft-budget" class="verdict"></p>
+      <p class="context">Це розпізнавання моделі, ще не перевірений план. Якщо є помилка, змініть запит ліворуч і повторіть.</p>
+      <button id="confirm"><i data-lucide="check" aria-hidden="true"></i>Потреби правильні · перевірити ціни</button>
+    </div>
+    <div id="result" hidden>
+      <div class="result-title"><h2>Особистий план</h2><span id="mode" class="badge"></span></div>
+      <p id="context" class="context"></p>
+      <p id="parsed" class="parsed"></p>
+      <div id="products" class="products"></div>
+      <div class="totals"><div><span id="total-label">Орієнтовна вартість</span><strong id="total"></strong></div><div><span>Бюджет</span><strong id="budget"></strong></div><div><span id="balance-label">Залишається</span><strong id="balance"></strong></div></div>
+      <p id="verdict" class="verdict"></p>
+      <p class="disclaimer">Серед отриманих товарів, без доставки. Ціни та залишки можуть змінитися. Це не резерв товарів.</p>
+    </div>
+  </section>
+  <section class="evidence" aria-label="Перевірка джерел">
+    <h2>Від потреби до рішення</h2>
+    <ol class="chain"><li><b>01</b><div><strong>Аналіз потреб</strong><span id="model-state">Розпізнавання потреб</span></div></li><li><b>02</b><div><strong>Офіційний MCP Сільпо</strong><span id="mcp-state">Товари, ціни, залишки</span></div></li><li><b>03</b><div><strong>Перевірка правил</strong><span id="rules-state">Кількість і бюджет</span></div></li></ol>
+    <p id="evidence-note">Очікується запуск перевірки.</p>
+    <details id="trace"><summary>Виклики та джерела</summary><div id="calls"></div></details>
+    <p class="privacy">Особиста історія, профіль акаунта та кошик не запитуються. Модель працює на цьому ПК.</p>
+  </section>
+</main>
+<footer><span>СПС · Робоча демонстрація персонального сервісу</span><span>Спільна сила. Особистий вибір.</span></footer>
+</body></html>

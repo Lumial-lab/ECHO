@@ -1,0 +1,243 @@
+{
+  "ok": true,
+  "schema": "sps_read_only_agent_demo_v1",
+  "mode": "live",
+  "at": "2026-09-13T16:14:41.010111+00:00",
+  "request": "План: Картопля 2 кг, Куряче філе 1 кг, Курячі яйця 10 шт. Бюджет 500 грн.",
+  "profile": "Олена, умовна покупчиня для демонстрації",
+  "model": {
+    "model": "qwen3:4b",
+    "location": "local",
+    "purpose": "request_extraction",
+    "ms": 6259,
+    "output_sha256": "b7b2fda0911a29046331d3110e59ddcbee095988b5820348d9e0e82783549c80",
+    "response_validated": true
+  },
+  "plan": {
+    "items": [
+      {
+        "kind": "potato",
+        "quantity": 2.0,
+        "unit": "kg"
+      },
+      {
+        "kind": "chicken",
+        "quantity": 1.0,
+        "unit": "kg"
+      },
+      {
+        "kind": "eggs",
+        "quantity": 10.0,
+        "unit": "pcs"
+      }
+    ],
+    "budget": 500.0,
+    "needs_clarification": false
+  },
+  "branch": {
+    "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+    "city": "Київ",
+    "address": "просп. Володимира Івасюка, 46"
+  },
+  "slot": {
+    "start": "2026-09-13T17:30:00+00:00",
+    "end": "2026-09-13T18:00:00+00:00"
+  },
+  "calls": [
+    {
+      "tool": "silpo_list_branches",
+      "arguments": {
+        "limit": 500,
+        "hasPickup": true
+      },
+      "ok": true,
+      "response_sha256": "4eb414b75c4856ef8d7fd81e534bdb0bcee83ae8968612a21ffd3026da68d251",
+      "ms": 283
+    },
+    {
+      "tool": "silpo_get_categories",
+      "arguments": {
+        "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+        "limit": 1000
+      },
+      "ok": true,
+      "response_sha256": "b39ccc91ce2d8fb28ba1c4dd32aa1b9128b92ca8b78d42b22c98b898cffb7903",
+      "ms": 554
+    },
+    {
+      "tool": "silpo_get_time_slots",
+      "arguments": {
+        "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+        "deliveryTypes": [
+          "SelfPickup"
+        ],
+        "limit": 100
+      },
+      "ok": true,
+      "response_sha256": "e5dd080c98894ca59cd9dd0dc6feaf12b99612f084e3cd0696aa797a10b36c35",
+      "ms": 245
+    },
+    {
+      "tool": "silpo_get_products",
+      "arguments": {
+        "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+        "deliveryType": "SelfPickup",
+        "timeslotStart": "2026-09-13T17:30:00+00:00",
+        "timeslotEnd": "2026-09-13T18:00:00+00:00",
+        "category": "kartoplia-i-batat-4817",
+        "inStock": true,
+        "limit": 100
+      },
+      "ok": true,
+      "response_sha256": "d2c41f565a65f51e0652e10335d28761c3a13df978bfa6573ec247b447b34c28",
+      "ms": 150
+    },
+    {
+      "tool": "silpo_get_products",
+      "arguments": {
+        "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+        "deliveryType": "SelfPickup",
+        "timeslotStart": "2026-09-13T17:30:00+00:00",
+        "timeslotEnd": "2026-09-13T18:00:00+00:00",
+        "category": "kuriatyna-4426",
+        "inStock": true,
+        "limit": 100
+      },
+      "ok": true,
+      "response_sha256": "95d6847b43b5f85a6d33beb26ee06410f95769b51979183acae46f8fd424a9cd",
+      "ms": 200
+    },
+    {
+      "tool": "silpo_get_products",
+      "arguments": {
+        "branchId": "1ed43e73-051b-6842-a111-a5ad042eb496",
+        "deliveryType": "SelfPickup",
+        "timeslotStart": "2026-09-13T17:30:00+00:00",
+        "timeslotEnd": "2026-09-13T18:00:00+00:00",
+        "category": "kuriachi-iaitsia-4977",
+        "inStock": true,
+        "limit": 100
+      },
+      "ok": true,
+      "response_sha256": "16b8ebcf86741451636868a9f4bacd02a94da4c3fccf976accac54979ef3e6a8",
+      "ms": 149
+    }
+  ],
+  "result": {
+    "rows": [
+      {
+        "kind": "potato",
+        "label": "Картопля",
+        "selected": {
+          "name": "Картопля Беллароса",
+          "slug": "kartoplia-bellarosa-556355",
+          "price": 18.99,
+          "price_unit": "кг",
+          "requested": 2.0,
+          "unit": "кг",
+          "purchase_units": 2.0,
+          "cost": 37.98,
+          "image": "https://images.silpo.ua/v2/products/500x500/webp/092c017c-2f5b-4713-91bf-92aaf0857f8f.png"
+        },
+        "alternatives": [],
+        "checked": 4,
+        "compatible": 1
+      },
+      {
+        "kind": "chicken",
+        "label": "Куряче філе",
+        "selected": {
+          "name": "Куряче філе зі стегна",
+          "slug": "kuriache-file-zi-stegna-757310",
+          "price": 244.76,
+          "price_unit": "кг",
+          "requested": 1.0,
+          "unit": "кг",
+          "purchase_units": 1.0,
+          "cost": 244.76,
+          "image": "https://images.silpo.ua/v2/products/500x500/webp/925385b0-88c5-480f-8aa8-d7f2fc4b6398.png"
+        },
+        "alternatives": [
+          {
+            "name": "Куряче філе",
+            "slug": "kuriache-file-461800",
+            "price": 255.73,
+            "price_unit": "кг",
+            "requested": 1.0,
+            "unit": "кг",
+            "purchase_units": 1.0,
+            "cost": 255.73,
+            "image": "https://images.silpo.ua/v2/products/500x500/webp/ac8a8508-3e0d-4125-a3b3-c7599b2798d2.png"
+          },
+          {
+            "name": "Філе курчати-бройлера мале охолоджене",
+            "slug": "file-kurchaty-broilera-male-okholodzhene-880205",
+            "price": 287.83,
+            "price_unit": "кг",
+            "requested": 1.0,
+            "unit": "кг",
+            "purchase_units": 1.0,
+            "cost": 287.83,
+            "image": "https://images.silpo.ua/v2/products/500x500/webp/160485a9-e21c-4a1c-a87d-917ca3cd93d8.png"
+          }
+        ],
+        "checked": 27,
+        "compatible": 3
+      },
+      {
+        "kind": "eggs",
+        "label": "Курячі яйця",
+        "selected": {
+          "name": "Яйця курячі Свіжак харчові столові C2",
+          "slug": "yaitsia-kuriachi-svizhak-kharchovi-stolovi-c2-1003918",
+          "price": 80.84,
+          "price_unit": "уп. (10шт)",
+          "requested": 10.0,
+          "unit": "шт",
+          "purchase_units": 1.0,
+          "cost": 80.84,
+          "image": "https://images.silpo.ua/v2/products/500x500/webp/ba8d09fa-eca4-41ec-afee-03327e26bf90.png"
+        },
+        "alternatives": [
+          {
+            "name": "Яйця курячі «Ясенсвіт» харчові столові С1",
+            "slug": "yaitsia-kuriachi-yasensvit-kharchovi-stolovi-s1-809640",
+            "price": 80.84,
+            "price_unit": "уп. (10шт)",
+            "requested": 10.0,
+            "unit": "шт",
+            "purchase_units": 1.0,
+            "cost": 80.84,
+            "image": "https://images.silpo.ua/v2/products/500x500/webp/e69c2d3b-a959-4d33-894e-737a87fceb6c.png"
+          },
+          {
+            "name": "Яйця курячі С1 «Квочка»",
+            "slug": "yaitsia-kuriachi-s1-kvochka-452276",
+            "price": 86.34,
+            "price_unit": "уп. (10шт)",
+            "requested": 10.0,
+            "unit": "шт",
+            "purchase_units": 1.0,
+            "cost": 86.34,
+            "image": "https://images.silpo.ua/v2/products/500x500/webp/501791dc-6a41-42d7-b2f9-1c365c90f0f5.png"
+          }
+        ],
+        "checked": 8,
+        "compatible": 6
+      }
+    ],
+    "total": 363.58,
+    "budget": 500.0,
+    "remaining": 136.42,
+    "missing": [],
+    "decision": "within_budget",
+    "selection_scope": "lowest_cost_among_compatible_fetched_products",
+    "semantic_scope": "category_and_name_checks_only_not_ingredient_or_preparation_certification",
+    "notice": "Орієнтовна вартість, не резерв і не замовлення. Перевірте розпізнані потреби й обрані товари."
+  },
+  "read_only": true,
+  "cart_changed": false,
+  "plan_confirmation": "explicit_operator_confirmation",
+  "trace_file": "agent-demo-20260913T161437927646.jsonl",
+  "report_sha256": "a33f0afcb98b34baeefd093caa42b6e80804169e4b93a7b836528b31d9dfc3c9"
+}

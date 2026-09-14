@@ -1,0 +1,118 @@
+{
+  ".gitattributes": {
+    "bytes": 8,
+    "sha256": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da"
+  },
+  "COMPONENTS.md": {
+    "bytes": 5416,
+    "sha256": "51fc8fd8c94ec6b44a22de43e60fb7fee831555852a11469ace17c9273500682"
+  },
+  "MCP-EVIDENCE.json": {
+    "bytes": 8320,
+    "sha256": "e5f94033c386b9c77107f3938a0f07f2b032d3e97a39f81034ef38a50a8fa00a"
+  },
+  "README.md": {
+    "bytes": 7600,
+    "sha256": "10ed5352eb3f34f0ae746c139bb69dde7324b9b0615878aef20d7ad3b0f07e75"
+  },
+  "sps-jury-v1-2.docx": {
+    "bytes": 200236,
+    "sha256": "a843d103e9ca4ed571e804f95896b026a855ad4761c7fc3f753002522d7c7b50"
+  },
+  "sps-jury-v1-2.pdf": {
+    "bytes": 374077,
+    "sha256": "bda99940892ae2822a72a883e23c1f731cf2a3c13351b9ac190ab6fc84f5da2a"
+  },
+  "sps-middle-uk.srt": {
+    "bytes": 5237,
+    "sha256": "87abc301349a054edaca6f1e34ff45821971865f558a084f6663c75a18fb70ad"
+  },
+  "sps-middle-uk.vtt": {
+    "bytes": 5245,
+    "sha256": "200727139ceea62966bf5dd617d404f370c917d5c662691f5274e6fabea8f953"
+  },
+  "sps-pitch-v4-3.mp4": {
+    "bytes": 31305992,
+    "sha256": "202945a344c7f5814afeabf0d620980c1355ea89cde4d50b254f9ee570ac58bb"
+  },
+  "source/.gitignore": {
+    "bytes": 67,
+    "sha256": "abae930b8943cbddc63a4706abdcbe6a1eaccf4460a74405bc0dd76803b8cb69"
+  },
+  "source/requirements-web.txt": {
+    "bytes": 112,
+    "sha256": "4e4f4b51a2c2e0d74a25555db6279ee278eea2c1438698160e7aa08c11ebab0d"
+  },
+  "source/test_shopping_agent.py": {
+    "bytes": 9874,
+    "sha256": "9eca87954dfc331e0ff7a3521b51b8850c39a43935394bf9143b0921898bbda4"
+  },
+  "source/odarka/shopping_agent.py": {
+    "bytes": 17126,
+    "sha256": "77fe4dd5885530a99f376fb8a4e66e50c2acea4ca1262f7dfa2ac08118f3405a"
+  },
+  "source/odarka/tier2.py": {
+    "bytes": 14539,
+    "sha256": "f091806941b327f6df68ae188647c27632681d8a620793202de7f30f725d0c4f"
+  },
+  "source/odarka/web.py": {
+    "bytes": 17361,
+    "sha256": "5ab2b989a8cf5bed5cb123f9551c2e6274a43c815ec386319d2eaa39a63b08bc"
+  },
+  "source/odarka/__init__.py": {
+    "bytes": 671,
+    "sha256": "6097e3dfc74f88dc47e2f0eb5b321d5290e4f0c9b6755eb84635d5b399210834"
+  },
+  "source/silpo_mcp/client.py": {
+    "bytes": 10547,
+    "sha256": "922952e7100ce0b6c96fc91ad99d0febe9087edb0a609483b0cb8d93d6c509a4"
+  },
+  "source/silpo_mcp/config.py": {
+    "bytes": 2019,
+    "sha256": "97b6fa5075b3a96a1f56bc177999d26ecee17ef646db7d5de90ab756d1ffe3c6"
+  },
+  "source/silpo_mcp/oauth.py": {
+    "bytes": 13405,
+    "sha256": "438e5a51654ea883e95527ebe513d77bc222327bcb44ed0f08021feca572a605"
+  },
+  "source/silpo_mcp/trace.py": {
+    "bytes": 6440,
+    "sha256": "52bd8749b34aab0bf8db9279e4d52d56b8c641232fe62805443c5a8886788bb0"
+  },
+  "source/silpo_mcp/__init__.py": {
+    "bytes": 628,
+    "sha256": "c0b127838f25676405c878084bf8a83eb0bb4cf0c69e9cee60e468359490c6af"
+  },
+  "source/silpo_mcp/__main__.py": {
+    "bytes": 9224,
+    "sha256": "b6294fbb5516f9947b96be12ed90b85cb8ffcd49248d4386b2e4668319d28440"
+  },
+  "source/odarka/static/agent-demo-recording.json": {
+    "bytes": 8320,
+    "sha256": "e5f94033c386b9c77107f3938a0f07f2b032d3e97a39f81034ef38a50a8fa00a"
+  },
+  "source/odarka/static/agent-demo.css": {
+    "bytes": 6783,
+    "sha256": "ae8213d72a39fa3cfb29c6441fa7e01c42e8e131546d6d9230867a7d904e2f07"
+  },
+  "source/odarka/static/agent-demo.html": {
+    "bytes": 4963,
+    "sha256": "66a71ec39c9442d36bd0ef0e6c9acccd0aef78d75f07bebce179011cb11410bd"
+  },
+  "source/odarka/static/agent-demo.js": {
+    "bytes": 9986,
+    "sha256": "584e71d2db595c99622d596fc10c6860a855d04d45c60b84947ed2bf8ca866fd"
+  },
+  "source/odarka/static/index.html": {
+    "bytes": 241,
+    "sha256": "a2c7025b9c5575330f6113bcfc1f08fccc7088261da921e280fc7f7cd382ac95"
+  },
+  "source/odarka/static/assets/LUCIDE-LICENSE.txt": {
+    "bytes": 895,
+    "sha256": "c059ec5ba27c5876963f0678f63d2182a6fb6ce97d45ed8b6472ec0c2ec189bf"
+  },
+  "source/odarka/static/assets/lucide.min.js": {
+    "bytes": 357808,
+    "sha256": "4a1df82cb2d94f5ef6e974846e7dede7440f1620cae161c9655cad48356002c2"
+  }
+}
