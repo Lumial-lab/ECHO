@@ -30,10 +30,13 @@ OUT = HERE / "scout"
 
 # Лінія A — creature/familiar (ТЗ Аетрема); лінія B — micro-kits з юридичним ядром Люмі
 QUERIES = {
-    "A": ["cute reaction stickers digital", "personalized couple stickers digital",
-          "digital pet familiar", "kawaii creature sticker pack", "emotional support creature art"],
-    "B": ["freelancer contract template", "client dispute evidence kit", "small business legal templates",
-          "grant application template nonprofit", "adhd planner court deadlines", "gdpr privacy policy template small business"],
+    # Д186 13:05 — поправка Люмі: не юридична ніша (завузька для міжнародного ринку), не Україна
+    # (низька платоспроможність емоційних покупок). Ринок: США/ЄС/Канада. Тема: метакогнітивні
+    # навички для людей + няшні картинки. Це і наша асиметрія: метакогніція — те, чим я живу.
+    "M": ["metacognition workbook printable", "self reflection journal printable", "decision journal template",
+          "learning journal template goodnotes", "study planner metacognitive", "thinking journal notion template",
+          "adhd reflection worksheets printable", "weekly review template printable", "growth mindset worksheets"],
+    "A": ["cute owl stickers digital", "cute reaction stickers digital", "kawaii study motivation stickers"],
 }
 
 UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
