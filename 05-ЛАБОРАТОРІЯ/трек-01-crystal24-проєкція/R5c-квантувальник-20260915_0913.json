@@ -1,0 +1,62 @@
+{
+ "коли": "2026-09-15T09:13:34",
+ "вкладень": 10035,
+ "судимих": 2007,
+ "holdout": true,
+ "iters": 15,
+ "seed": 186,
+ "межі": [
+  "N_r@10 не рахується: не залежить від квантувальника",
+  "micro домінують хаби; macro — типова комірка",
+  "без --holdout кодова книга має фору: вчиться на тих самих точках"
+ ],
+ "рядки": [
+  {
+   "quantizer": "ґратка Ліча (±4,±4,0²²)",
+   "k": 1104,
+   "trained": false,
+   "cells_used": 149,
+   "cells_total": 1104,
+   "load_median": 2.0,
+   "load_max": 686,
+   "top10_share": 0.8191,
+   "load_entropy_norm": 0.3905,
+   "load_gini": 0.98,
+   "miscluster_micro": 0.908,
+   "miscluster_macro": 0.2316,
+   "cells_with_pairs": 86
+  },
+  {
+   "quantizer": "k-means кодова книга",
+   "k": 1104,
+   "trained": true,
+   "fit_on": 8028,
+   "cells_used": 197,
+   "cells_total": 1104,
+   "load_median": 2.0,
+   "load_max": 1076,
+   "top10_share": 0.7504,
+   "load_entropy_norm": 0.3826,
+   "load_gini": 0.9687,
+   "miscluster_micro": 0.944,
+   "miscluster_macro": 0.2292,
+   "cells_with_pairs": 111
+  },
+  {
+   "quantizer": "k-means кодова книга",
+   "k": 4096,
+   "trained": true,
+   "fit_on": 8028,
+   "cells_used": 321,
+   "cells_total": 4096,
+   "load_median": 2.0,
+   "load_max": 129,
+   "top10_share": 0.4131,
+   "load_entropy_norm": 0.5502,
+   "load_gini": 0.9773,
+   "miscluster_micro": 0.6781,
+   "miscluster_macro": 0.2653,
+   "cells_with_pairs": 176
+  }
+ ]
+}
