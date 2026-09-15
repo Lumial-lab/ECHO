@@ -155,10 +155,21 @@ def run_once(dag: str, dry: bool = False) -> int:
     _free_stuck(dag, nodes)
     nodes = syntonia_dag._state(dag)  # перечитати після можливих звільнень
     # Д186: тег [auto] читається і з назви, і з опису (граф biz має його в назвах).
-    ready_auto = [n for n in nodes.values()
-                  if n["status"] == "ready"
-                  and "[auto]" in (n["title"] + " " + n["desc"])
-                  and "[auto:off]" not in (n["title"] + " " + n["desc"])]
+    # Д187: DAG дописується, а не редагується — тому ЗАБОРОНУ треба вміти дати
+    # НОТАТКОЮ пізніше. [auto:off] читається і з нотаток; [auto] — ні (нотатка
+    # може лише заборонити, не дозволити). Привід: у описі вузла для Люмі я
+    # написав «НЕ [auto]», і робітник побачив у запереченні тег-дозвіл.
+    def _tags(n: dict) -> tuple[str, str]:
+        base = f"{n['title']} {n['desc']}"
+        return base, base + " " + " ".join(n.get("notes") or [])
+
+    ready_auto = []
+    for n in nodes.values():
+        if n["status"] != "ready":
+            continue
+        base, full = _tags(n)
+        if "[auto]" in base and "[auto:off]" not in full:
+            ready_auto.append(n)
     if not ready_auto:
         _log({"event": "idle", "dag": dag, "reason": "немає ready-вузлів з [auto]"})
         print("Рій: живий, роботи немає (ready+[auto] = 0).")
