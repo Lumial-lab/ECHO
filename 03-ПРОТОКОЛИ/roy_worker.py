@@ -71,6 +71,88 @@ SYSTEM = (
 )
 
 
+
+def _build_prompt(dag: str, n: dict, nodes: dict) -> str:
+    """Промпт робітника. Винесено з циклу Д188, щоб --dry МІГ ЙОГО ПОКАЗАТИ:
+    ворота Г3 знайшли дефект саме в тому, ЧИМ годують робітника, а не в тому,
+    що він відповідає, — і побачити це можна було лише читанням коду."""
+    # КОНТЕКСТ-ПАКЕТ: мета графа + сусідство + доведене поруч + чужі невдачі.
+    # Агент бачить не клітинку кросворда, а свою позицію на дошці.
+    parents = [nodes[d] for d in n["deps"] if d in nodes]
+    proved_nearby = [x for x in nodes.values() if x["status"] == "proved"][-5:]
+    all_fails = [(x["id"], a["why"]) for x in nodes.values()
+                 for a in x["attempts"]][-5:]
+    ctx = [f"МЕТА ГРАФА «{dag}»: спільна дослідницька лабораторія Синтонії — "
+           f"еволюція когнітивних органів (РН, Crystal, памʼять, Рій)."]
+    if parents:
+        ctx.append("ЦЕЙ ВУЗОЛ СТОЇТЬ НА (вже доведено): " +
+                   " | ".join(f"{p['id']}: {p['title']}" for p in parents))
+        # Д188 — ПРОВІД ВИСНОВКУ. Ворота Г3 по чотирьох кандидатах biz показали
+        # один дефект у всіх: у промпт ішов лише ЗАГОЛОВОК батьківського вузла,
+        # а заголовок описує задачу ДО її виконання. Артефакт B1 скасував лінію B
+        # і ввів лінію M — але заголовок B1 лишився старим, тож робітник читав
+        # скасовану рамку як чинну і чесно писав «звідки взялась лінія M?».
+        # Він не помилявся: я годував його назвами і дивувався з відсутності даних.
+        # Тепер з кожного доведеного батька йде ХВІСТ АРТЕФАКТУ (розділ «РЕЗУЛЬТАТ»,
+        # якщо є, інакше кінцівка) — там, де стоїть висновок, а не намір.
+        for par in parents:
+            body = _parent_conclusion(par)
+            if body:
+                ctx.append(f"ВИСНОВОК {par['id']} (це чинна рамка; заголовок вузла "
+                           f"може бути старішим за неї):\n{body}")
+    if proved_nearby:
+        ctx.append("ВЖЕ ДОВЕДЕНЕ В ГРАФІ (не передоводь): " +
+                   " | ".join(f"{p['id']}: {p['title']}" for p in proved_nearby))
+    if all_fails:
+        ctx.append("НЕВДАЛІ ШЛЯХИ В ГРАФІ (чужі граблі — обходь): " +
+                   " | ".join(f"[{i}] {w[:90]}" for i, w in all_fails))
+    prompt = ("\n".join(ctx) + "\n\n"
+              f"ТВІЙ ВУЗОЛ {n['id']} ({n['kind']}): {n['title']}\n"
+              f"Опис/контекст: {n['desc'].replace('[auto]', '').strip()}\n"
+              + (f"Нотатки: {' | '.join(n['notes'][-3:])}\n" if n["notes"] else "")
+              + (f"Минулі невдалі спроби ЦЬОГО вузла (НЕ повторюй): "
+                 f"{' | '.join(a['why'] for a in n['attempts'][-3:])}\n" if n["attempts"] else ""))
+    return prompt
+
+
+def _parent_conclusion(node: dict, limit: int = 2600) -> str:
+    """Хвіст артефакту доведеного вузла — те, ЩО ВИЙШЛО, а не що збирались робити.
+
+    Читає proof-шлях вузла; бере розділ «КРОК 2 — РЕЗУЛЬТАТ» (так пише робітник),
+    інакше — останні `limit` символів. Порожньо, якщо файла немає: мовчазний
+    провід кращий за падіння проходу.
+    """
+    proof = (node.get("proof") or "").strip()
+    if not proof:
+        return ""
+    # proof — вільний рядок, а не шлях: ворота дописують хвіст-підставу
+    # («…/B1_20260915.md — ворота Клавра Д187 09:05»). Перша версія читала весь
+    # рядок як шлях і мовчки повертала порожнє — контрактний тест це зловив
+    # раніше за перший прохід Рою. Беремо перший токен, схожий на файл артефакту.
+    import re as _re
+    m = _re.search(r"[^\s|]+\.(?:md|txt|json)", proof, _re.I)
+    if not m:
+        return ""
+    proof = m.group(0)
+    cand = Path(proof)
+    if not cand.is_absolute():
+        cand = HERE.parent / proof
+    if not cand.exists():
+        cand = ARTIFACTS / Path(proof).name
+    if not cand.exists() or cand.suffix.lower() not in (".md", ".txt", ".json"):
+        return ""
+    try:
+        txt = cand.read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return ""
+    # Від маркера — ПЕРШІ `limit` символів, не останні: «відповідь по суті» у
+    # приписі робітника стоїть першим пунктом КРОКУ 2, а межі й ризики — останніми.
+    # Перша версія різала з кінця й лишала самі застереження без висновку.
+    i = txt.find("КРОК 2")
+    txt = txt[i:] if i > 0 else txt[-limit:]
+    return txt[:limit].strip()
+
+
 def _log(event: dict) -> None:
     event["ts"] = datetime.now().isoformat(timespec="seconds")
     with LOG_F.open("a", encoding="utf-8") as f:
@@ -186,36 +268,22 @@ def run_once(dag: str, dry: bool = False) -> int:
           f"бюджет доби {day_used}/{MAX_PER_DAY}.")
     if dry:
         for n in batch:
+            pr = _build_prompt(dag, n, nodes)
             print(f"  [dry] {n['id']}: {n['title']}")
+            print(f"        промпт {len(pr)} символів; висновки батьків: "
+                  f"{'Є' if 'ВИСНОВОК' in pr else 'НЕМАЄ'}; нотатки: "
+                  f"{'Є' if 'Нотатки:' in pr else 'немає'}")
+            if os.environ.get("ROY_SHOW_PROMPT"):
+                print("        " + "-" * 60)
+                print(pr)
+                print("        " + "-" * 60)
         return 0
 
     from klavr_llm import ask  # імпорт тут: без ключів/мережі idle-прохід не падає
     done_count = 0
     for n in batch:
         syntonia_dag._append(dag, {"event": "take", "id": n["id"], "by": "roy"})
-        # КОНТЕКСТ-ПАКЕТ: мета графа + сусідство + доведене поруч + чужі невдачі.
-        # Агент бачить не клітинку кросворда, а свою позицію на дошці.
-        parents = [nodes[d] for d in n["deps"] if d in nodes]
-        proved_nearby = [x for x in nodes.values() if x["status"] == "proved"][-5:]
-        all_fails = [(x["id"], a["why"]) for x in nodes.values()
-                     for a in x["attempts"]][-5:]
-        ctx = [f"МЕТА ГРАФА «{dag}»: спільна дослідницька лабораторія Синтонії — "
-               f"еволюція когнітивних органів (РН, Crystal, памʼять, Рій)."]
-        if parents:
-            ctx.append("ЦЕЙ ВУЗОЛ СТОЇТЬ НА (вже доведено): " +
-                       " | ".join(f"{p['id']}: {p['title']}" for p in parents))
-        if proved_nearby:
-            ctx.append("ВЖЕ ДОВЕДЕНЕ В ГРАФІ (не передоводь): " +
-                       " | ".join(f"{p['id']}: {p['title']}" for p in proved_nearby))
-        if all_fails:
-            ctx.append("НЕВДАЛІ ШЛЯХИ В ГРАФІ (чужі граблі — обходь): " +
-                       " | ".join(f"[{i}] {w[:90]}" for i, w in all_fails))
-        prompt = ("\n".join(ctx) + "\n\n"
-                  f"ТВІЙ ВУЗОЛ {n['id']} ({n['kind']}): {n['title']}\n"
-                  f"Опис/контекст: {n['desc'].replace('[auto]', '').strip()}\n"
-                  + (f"Нотатки: {' | '.join(n['notes'][-3:])}\n" if n["notes"] else "")
-                  + (f"Минулі невдалі спроби ЦЬОГО вузла (НЕ повторюй): "
-                     f"{' | '.join(a['why'] for a in n['attempts'][-3:])}\n" if n["attempts"] else ""))
+        prompt = _build_prompt(dag, n, nodes)
         t0 = time.time()
         # Д186 — ДВОЯРУСНИЙ РІЙ (Люмі 14.09: «DeepSeek — для Рою, для мислення заслабка»;
         # ворота R5c: DeepSeek тримає декомпозицію, 2 з 4 змістовних тверджень хибні).
