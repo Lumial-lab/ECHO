@@ -28,16 +28,22 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent / "dags"
+# Д187: один інструмент — кілька домівок графів. Трек може тримати свій граф
+# поруч зі своїми матеріалами (Кристал-24 живе у МХ-Проєкті, разом з Аетремом),
+# не розщеплюючи інструмент на копії, які неминуче розійдуться. Без змінної
+# поведінка та сама, що була, — Ейденові й решті треків нічого не змінилось.
+ROOT = Path(os.environ.get("SYNTONIA_DAG_ROOT")
+            or (Path(__file__).resolve().parent / "dags"))
 
 
 def _path(dag: str) -> Path:
-    ROOT.mkdir(exist_ok=True)
+    ROOT.mkdir(parents=True, exist_ok=True)
     return ROOT / f"{dag}.dag.jsonl"
 
 
@@ -142,6 +148,13 @@ def main() -> int:
         print(f"{a.cmd} → {a.id}")
     elif a.cmd == "status":
         nodes = _state(a.dag)
+        # Д188: мовчання — не відповідь. Порожній вивід тут читався як «дерево
+        # чисте», хоча насправді журнал лежав в іншому сховищі (SYNTONIA_DAG_ROOT).
+        # Прилад мусить називати відсутність, а не показувати її порожнечею.
+        if not nodes:
+            print(f"(дерево «{a.dag}» порожнє або відсутнє: {_path(a.dag)})")
+            print("   якщо журнал в іншому сховищі — задай SYNTONIA_DAG_ROOT")
+            return 0
         order = ["ready", "in_progress", "candidate", "blocked", "contested", "refuted", "proved"]
         for st in order:
             group = [n for n in nodes.values() if n["status"] == st]
