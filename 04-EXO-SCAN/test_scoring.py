@@ -8,7 +8,6 @@
 - Вісь з недостатньою кількістю відповідей → ⚪, не вигаданий бал
 """
 import sys
-sys.path.insert(0, "C:/ЕХО/04-EXO-SCAN")
 
 from scoring_engine import score, AxisScore, _check_condition
 
@@ -235,8 +234,9 @@ def test_multi_choice_scoring():
     answers = {"systems_used": ["crm", "erp"]}
     result = score(config, answers)
     ax = result.axes["systems"]
-    # crm=1 + erp=2 = 3, weight=1.0, total_weight=4.0, normalized=3/4=0.75
+    # crm=1 + erp=2 = 3 on the declared 0-4 scale.
     assert ax.raw_points == 3.0, f"Expected 3.0, got {ax.raw_points}"
+    assert ax.normalized == 3.0
     print("  PASS: multi_choice сума")
 
 

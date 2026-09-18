@@ -12,6 +12,7 @@
       "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
       "examples": ["0.1.0"]
     },
+    "methodology_status": {"type": "string", "enum": ["DRAFT_FOR_CALIBRATION", "VALIDATED"]},
     "axes": {
       "type": "array",
       "description": "Вісі радару (за брифом — 8 штук). Кожна має шкалу 0-4.",
@@ -125,6 +126,9 @@
           "type": "boolean",
           "default": true
         },
+        "minimum": {"type": "number"},
+        "maximum": {"type": "number"},
+        "max_length": {"type": "integer", "minimum": 1},
         "show_if": {
           "$ref": "#/$defs/condition",
           "description": "Умова показу питання (branching logic)"
@@ -137,7 +141,9 @@
             "required": ["value", "label"],
             "properties": {
               "value": { "type": "string" },
-              "label": { "type": "string", "description": "Текст варіанту українською" }
+              "label": { "type": "string", "description": "Текст варіанту українською" },
+              "exclusive": { "type": "boolean", "description": "Не поєднується з іншими виборами цього питання." },
+              "non_scoring": { "type": "boolean", "description": "Невідоме, незастосовне та власна відповідь не є нульовими балами." }
             }
           }
         },
@@ -152,11 +158,11 @@
               "points": {
                 "description": "Бали або маппінг відповідей на бали",
                 "oneOf": [
-                  { "type": "number" },
+                  { "type": "number", "minimum": 0, "maximum": 4 },
                   {
                     "type": "object",
                     "description": "Маппінг: значення відповіді → бали",
-                    "additionalProperties": { "type": "number" }
+                    "additionalProperties": { "type": "number", "minimum": 0, "maximum": 4 }
                   }
                 ]
               },
@@ -184,8 +190,8 @@
           "properties": {
             "points": {
               "oneOf": [
-                { "type": "number" },
-                { "type": "object", "additionalProperties": { "type": "number" } }
+                { "type": "number", "minimum": 0, "maximum": 4 },
+                { "type": "object", "additionalProperties": { "type": "number", "minimum": 0, "maximum": 4 } }
               ]
             },
             "weight": { "type": "number", "minimum": 0, "default": 1.0 }

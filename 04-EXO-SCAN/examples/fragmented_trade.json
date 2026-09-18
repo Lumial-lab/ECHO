@@ -1,0 +1,10 @@
+{
+  "goal":"service","sector":"trade","team_size":"medium","customers":["people","business"],
+  "repeated_work":"several","priority_process":"customer_service","task_tools":["messages","tables","system"],
+  "process_data":"files","monthly_hours":"40_100","process_problem":["delay","search"],"process_owner":"limited",
+  "process_visibility":"registered","knowledge_access":"search","legal_review":"templates","data_access":"roles",
+  "resource_control":"costs","continuity":"partial","change_practice":"planned",
+  "external_topics":["market","competitors"],"external_cycle":"collect","website":"sales",
+  "site_inquiries":"manual","approved_answers":"partial",
+  "_comments":{"process_problem":"У різних відділах різні довідники товарів."}
+}

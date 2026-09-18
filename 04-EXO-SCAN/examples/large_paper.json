@@ -1,0 +1,8 @@
+{
+  "goal":"quality","sector":"manufacturing","team_size":"enterprise","customers":["business"],
+  "repeated_work":"several","priority_process":"documents","task_tools":["paper","messages"],
+  "process_data":"paper","monthly_hours":"ge100","process_problem":["manual","errors"],"process_owner":"assign",
+  "process_visibility":"manual","knowledge_access":"person","legal_review":"occasionally","data_access":"informal",
+  "resource_control":"estimate","continuity":"ask","change_practice":"trial",
+  "external_topics":["market","competitors","law"],"external_cycle":"adhoc","website":"no_site","other_channels":["partners","offline"]
+}

@@ -1,0 +1,224 @@
+{
+  "scoring_version": "0.2.0",
+  "methodology_status": "DRAFT_FOR_CALIBRATION",
+  "title": "ЕХО Діагност: перший маршрут",
+  "evidence_source": "respondent_self_report",
+  "comment_policy": {"optional": true, "max_length": 1000, "automatic_scoring": false, "contact_required": false},
+  "axes": [
+    {"id":"digital","label":"Цифрова основа","description":"Форма та керованість даних обраного процесу.","min_questions_for_score":1},
+    {"id":"process","label":"Видимість процесів","description":"Відповідальність, строки та спостереження результату.","min_questions_for_score":1},
+    {"id":"knowledge","label":"Знання й пам'ять","description":"Доступність актуальних знань для команди.","min_questions_for_score":1},
+    {"id":"legal","label":"Правовий контур","description":"Організація перевірки документів, доступів і повноважень. Не юридичний аудит.","min_questions_for_score":2},
+    {"id":"resources","label":"Фінанси й ресурси","description":"Вимірювання витрат праці та результатів.","min_questions_for_score":1},
+    {"id":"resilience","label":"Організаційна стійкість","description":"Можливість продовжити роботу за відсутності ключового працівника.","min_questions_for_score":1},
+    {"id":"intelligence","label":"Зовнішня розвідка","description":"Збір інформації, аналіз і перевірка дій за її результатами.","min_questions_for_score":1},
+    {"id":"adaptation","label":"Здатність до змін","description":"Як команда перевіряє й закріплює поліпшення.","min_questions_for_score":1}
+  ],
+  "digital_substrate_levels": [
+    {"level":0,"code":"D0","label":"Папір та усні домовленості","description":"Потрібне формування доступних даних."},
+    {"level":1,"code":"D1","label":"Скани та зображення","description":"Потрібні розпізнавання та контроль якості."},
+    {"level":2,"code":"D2","label":"Структуровані файли","description":"Потрібне узгодження джерел і версій."},
+    {"level":3,"code":"D3","label":"Керована система","description":"Є відповідальні, доступи та актуальні записи."},
+    {"level":4,"code":"D4","label":"Пов'язані системи","description":"Обмін даними та його якість контролюються."}
+  ],
+  "screens": [
+    {"id":"profile","title":"Підприємство і намір","questions":[
+      {"id":"goal","type":"single_choice","text":"Що насамперед хочете поліпшити?","options":[
+        {"value":"speed","label":"Швидкість роботи та навантаження команди"},
+        {"value":"quality","label":"Якість роботи та зменшення помилок"},
+        {"value":"service","label":"Продажі й обслуговування клієнтів"},
+        {"value":"control","label":"Прозорість і керованість роботи"},
+        {"value":"opportunities","label":"Пошук нових можливостей"},
+        {"value":"unknown","label":"Поки важко визначити","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"sector","type":"single_choice","text":"Який основний напрям діяльності підприємства?","options":[
+        {"value":"trade","label":"Торгівля та дистрибуція"},
+        {"value":"services","label":"Професійні та побутові послуги"},
+        {"value":"manufacturing","label":"Виробництво та будівництво"},
+        {"value":"agriculture","label":"Сільське господарство"},
+        {"value":"nonprofit","label":"Громадська або благодійна діяльність"},
+        {"value":"mixed","label":"Кілька рівнозначних напрямів"},
+        {"value":"unknown","label":"Важко визначити","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"team_size","type":"single_choice","text":"Скільки людей регулярно працює у вашій команді?","options":[
+        {"value":"solo","label":"Одна людина"},{"value":"small","label":"2-9"},
+        {"value":"medium","label":"10-49"},{"value":"large","label":"50-249"},{"value":"enterprise","label":"250 або більше"},
+        {"value":"unknown","label":"Не знаю / важко оцінити","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"customers","type":"multi_choice","text":"Для кого працює підприємство?","options":[
+        {"value":"people","label":"Приватні особи"},{"value":"business","label":"Інші підприємства"},
+        {"value":"public","label":"Державні або громадські організації"},
+        {"value":"unknown","label":"Важко визначити","exclusive":true,"non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]}
+    ]},
+    {"id":"focus","title":"Перший процес для поліпшення","questions":[
+      {"id":"repeated_work","type":"single_choice","text":"Чи є регулярна робота з великим обсягом інформації, яка забирає багато часу команди?","options":[
+        {"value":"several","label":"Так, кілька процесів"},{"value":"one","label":"Так, один процес"},
+        {"value":"not_identified","label":"Поки такого процесу не виявлено"},
+        {"value":"unknown","label":"Важко оцінити","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"priority_process","type":"single_choice","text":"З чого було б найкорисніше почати?","hint":"Можна обрати роботу, яку хочете налагодити, навіть якщо зараз на неї не вистачає ресурсу.","options":[
+        {"value":"documents","label":"Документи, листування та перенесення даних"},
+        {"value":"customer_service","label":"Звернення клієнтів і підготовка відповідей"},
+        {"value":"knowledge","label":"Пошук внутрішніх знань та відповідей для команди"},
+        {"value":"reporting","label":"Зведення звітів та управлінська аналітика"},
+        {"value":"intelligence","label":"Пошук можливостей і відстеження зовнішніх змін"},
+        {"value":"unknown","label":"Потрібна допомога у виборі","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"task_tools","type":"multi_choice","text":"Де команда веде завдання й фіксує їх виконання?","options":[
+        {"value":"paper","label":"Усно або на папері"},{"value":"messages","label":"У листуванні та месенджерах"},
+        {"value":"tables","label":"У таблицях"},{"value":"system","label":"У спеціалізованій системі"},
+        {"value":"unknown","label":"Не знаю","exclusive":true,"non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]}
+    ]},
+    {"id":"process_detail","title":"Обраний процес","show_if":{"question_id":"priority_process","op":"in","value":["documents","customer_service","knowledge","reporting","intelligence","other"]},"questions":[
+      {"id":"process_data","type":"single_choice","text":"У якому вигляді доступна основна інформація для цього процесу?","options":[
+        {"value":"paper","label":"Переважно папір або усні відомості"},
+        {"value":"scans","label":"Скани, фото чи PDF без структурованих даних"},
+        {"value":"files","label":"Файли й таблиці, джерела та версії розрізнені"},
+        {"value":"managed","label":"Актуальні записи в системі з визначеними доступами"},
+        {"value":"connected","label":"Системи обмінюються даними, якість обміну перевіряється"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"na","label":"Процес ще не запущений, даних немає","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"digital","points":{"paper":0,"scans":1,"files":2,"managed":3,"connected":4}}],
+        "digital_substrate_rule":{"points":{"paper":0,"scans":1,"files":2,"managed":3,"connected":4}}},
+      {"id":"monthly_hours","type":"single_choice","text":"Скільки сумарних людино-годин витрачається на цей процес за місяць?","hint":"Включно з перевіркою, погодженнями та виправленнями; приблизної оцінки достатньо.","options":[
+        {"value":"lt10","label":"Менше 10"},{"value":"10_40","label":"Від 10 до менш ніж 40"},
+        {"value":"40_100","label":"Від 40 до менш ніж 100"},{"value":"ge100","label":"100 або більше"},
+        {"value":"not_started","label":"Ще не виконуємо цю роботу"},
+        {"value":"unknown","label":"Важко оцінити","non_scoring":true},
+        {"value":"other","label":"Інше / власна оцінка","non_scoring":true}]},
+      {"id":"process_problem","type":"multi_choice","text":"Що найбільше заважає в цьому процесі?","options":[
+        {"value":"manual","label":"Багато ручного перенесення та повторної обробки даних"},
+        {"value":"search","label":"Довго шукати інформацію та актуальну версію"},
+        {"value":"errors","label":"Помилки та повторна робота"},
+        {"value":"delay","label":"Затримки відповідей або погоджень"},
+        {"value":"capacity","label":"Не вистачає ресурсу для нових можливостей"},
+        {"value":"none","label":"Помітних перешкод немає","exclusive":true},
+        {"value":"unknown","label":"Важко визначити","exclusive":true,"non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"process_owner","type":"single_choice","text":"Хто може перевіряти якість результату пілота і приймати рішення?","options":[
+        {"value":"ready","label":"Є відповідальний фахівець і час на перевірку"},
+        {"value":"limited","label":"Фахівець є, але його час обмежений"},
+        {"value":"assign","label":"Відповідального ще треба визначити"},
+        {"value":"unknown","label":"Поки невідомо","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]}
+    ]},
+    {"id":"organization","title":"Як організована робота","questions":[
+      {"id":"process_visibility","type":"single_choice","text":"Як зазвичай відстежується виконання важливих завдань?","options":[
+        {"value":"oral","label":"Переважно усно, спільної картини немає"},
+        {"value":"manual","label":"Вручну збираємо статуси з різних джерел"},
+        {"value":"registered","label":"Завдання і строки записані, оновлення нерегулярні"},
+        {"value":"owned","label":"Статуси актуальні, відповідальні та строки визначені"},
+        {"value":"measured","label":"Крім цього, вимірюємо затримки та поліпшуємо процес"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"process","points":{"oral":0,"manual":1,"registered":2,"owned":3,"measured":4}}]},
+      {"id":"knowledge_access","type":"single_choice","text":"Як працівник знаходить актуальну інструкцію або відповідь на робоче запитання?","options":[
+        {"value":"person","label":"Переважно питає конкретну людину"},
+        {"value":"search","label":"Шукає в листуванні та різних папках"},
+        {"value":"shared","label":"Є спільне сховище, але актуальність не завжди зрозуміла"},
+        {"value":"maintained","label":"Є актуальні матеріали та відповідальні за оновлення"},
+        {"value":"verified","label":"Крім цього, перевіряємо, чи матеріали справді допомагають"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"knowledge","points":{"person":0,"search":1,"shared":2,"maintained":3,"verified":4}}]},
+      {"id":"legal_review","type":"single_choice","text":"Як перевіряють важливі договори, листи й зобов'язання перед погодженням?","options":[
+        {"value":"none","label":"Немає сталого порядку перевірки"},{"value":"occasionally","label":"Звертаємось по перевірку лише в окремих випадках"},
+        {"value":"templates","label":"Є шаблони та визначений порядок погодження"},
+        {"value":"specialist","label":"Є відповідальний фахівець і перевірка нетипових умов"},
+        {"value":"tracked","label":"Крім цього, відстежуємо зміни умов та виконання зобов'язань"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"legal","points":{"none":0,"occasionally":1,"templates":2,"specialist":3,"tracked":4}}]},
+      {"id":"data_access","type":"single_choice","text":"Як визначається, хто може отримувати та передавати робочі дані?","options":[
+        {"value":"open","label":"Спільні доступи, чітких правил немає"},{"value":"informal","label":"Домовляємося окремо в кожному випадку"},
+        {"value":"roles","label":"Права доступу розподілені за ролями"},
+        {"value":"reviewed","label":"Є правила передачі, права регулярно переглядаються"},
+        {"value":"audited","label":"Крім цього, ведемо журнал доступів і перевіряємо порушення"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"legal","points":{"open":0,"informal":1,"roles":2,"reviewed":3,"audited":4}}]},
+      {"id":"resource_control","type":"single_choice","text":"Чи можна зіставити витрати часу або коштів із результатом процесу?","options":[
+        {"value":"none","label":"Таких даних не збираємо"},{"value":"estimate","label":"Є лише приблизні оцінки"},
+        {"value":"costs","label":"Витрати фіксуємо, але з результатом не зіставляємо"},
+        {"value":"compare","label":"Регулярно зіставляємо витрати і результат"},
+        {"value":"improve","label":"На цій основі змінюємо роботу і перевіряємо ефект"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"resources","points":{"none":0,"estimate":1,"costs":2,"compare":3,"improve":4}}]},
+      {"id":"continuity","type":"single_choice","text":"Що відбувається, коли ключовий виконавець тимчасово недоступний?","options":[
+        {"value":"stops","label":"Робота переважно зупиняється"},{"value":"ask","label":"Потрібно терміново збирати пояснення та доступи"},
+        {"value":"partial","label":"Частину роботи передаємо за записами"},
+        {"value":"backup","label":"Є підготовлена заміна, актуальні матеріали та доступи"},
+        {"value":"tested","label":"Передачу роботи перевіряли на практиці"},
+        {"value":"na","label":"Не застосовується до нашого формату роботи","non_scoring":true},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"resilience","points":{"stops":0,"ask":1,"partial":2,"backup":3,"tested":4}}]},
+      {"id":"change_practice","type":"single_choice","text":"Як підприємство впроваджує нові інструменти та способи роботи?","options":[
+        {"value":"none","label":"Зміни зазвичай відкладаються"},{"value":"trial","label":"Пробуємо без визначених критеріїв"},
+        {"value":"planned","label":"Є план і відповідальний за впровадження"},
+        {"value":"pilot","label":"Спочатку перевіряємо на малому пілоті за показниками"},
+        {"value":"learn","label":"Крім цього, зберігаємо уроки й повторно перевіряємо ефект"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"adaptation","points":{"none":0,"trial":1,"planned":2,"pilot":3,"learn":4}}]}
+    ]},
+    {"id":"outside","title":"Зовнішня інформація і канали","questions":[
+      {"id":"external_topics","type":"multi_choice","text":"Яка зовнішня інформація важлива для ваших рішень?","options":[
+        {"value":"market","label":"Ринок, попит та ціни"},{"value":"competitors","label":"Конкуренти"},
+        {"value":"law","label":"Зміни правового поля"},{"value":"opportunities","label":"Тендери, фінансування та партнери"},
+        {"value":"technology","label":"Технології та нові способи роботи"},
+        {"value":"none","label":"Зараз не використовуємо","exclusive":true},
+        {"value":"unknown","label":"Важко визначити","exclusive":true,"non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"external_cycle","type":"single_choice","text":"Як зовнішня інформація перетворюється на робочі рішення?","options":[
+        {"value":"none","label":"Системно не збираємо"},{"value":"adhoc","label":"Шукаємо за потреби"},
+        {"value":"collect","label":"Регулярно збираємо, але системної аналітики немає"},
+        {"value":"analyze","label":"Аналізуємо, але не відстежуємо дії та їх результат"},
+        {"value":"act","label":"Є відповідальний, аналіз, дії та перевірка результату"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}],
+        "scoring_rules":[{"axis_id":"intelligence","points":{"none":0,"adhoc":1,"collect":2,"analyze":3,"act":4}}]},
+      {"id":"website","type":"single_choice","text":"Яку роль відіграє сайт підприємства?","options":[
+        {"value":"sales","label":"Продажі або отримання замовлень"},{"value":"inquiries","label":"Звернення та консультації"},
+        {"value":"information","label":"Інформація та репутація"},{"value":"no_site","label":"Сайту немає або він не використовується"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"other_channels","type":"multi_choice","text":"Які інші канали взаємодії з клієнтами важливі?","show_if":{"question_id":"website","op":"in","value":["no_site","other"]},"options":[
+        {"value":"social","label":"Соцмережі та месенджери"},{"value":"marketplace","label":"Маркетплейси"},
+        {"value":"partners","label":"Партнери та рекомендації"},{"value":"offline","label":"Офлайн, телефон або особисті зустрічі"},
+        {"value":"unknown","label":"Важко визначити","exclusive":true,"non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"site_inquiries","type":"single_choice","text":"Що відбувається зі зверненням із сайту?","show_if":{"question_id":"website","op":"in","value":["sales","inquiries"]},"options":[
+        {"value":"lost","label":"Частина звернень губиться або довго чекає"},{"value":"manual","label":"Відповідаємо вручну, спільної історії немає"},
+        {"value":"registered","label":"Звернення фіксуються і мають відповідального"},
+        {"value":"tracked","label":"Вимірюємо час відповіді та шлях до замовлення"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]},
+      {"id":"approved_answers","type":"single_choice","text":"Чи є актуальні перевірені відповіді на типові запитання клієнтів?","show_if":{"or":[{"question_id":"website","op":"in","value":["sales","inquiries"]},{"question_id":"priority_process","op":"eq","value":"customer_service"}]},"options":[
+        {"value":"yes","label":"Так, і є відповідальний за оновлення"},{"value":"partial","label":"Частково, матеріали треба впорядкувати"},
+        {"value":"no","label":"Ні, відповіді щоразу готуємо заново"},
+        {"value":"unknown","label":"Не знаю","non_scoring":true},
+        {"value":"other","label":"Інше / власна відповідь","non_scoring":true}]}
+    ]}
+  ],
+  "pilot_routes": {
+    "documents":{"label":"Підготовка даних із типових документів","metric":"Час на документ, частка помилок і час фахової перевірки","prerequisite":"Знеособлена вибірка типових документів і критерії приймання"},
+    "customer_service":{"label":"Чернетки відповідей на повторювані звернення","metric":"Час відповіді, частка виправлень і коректність передачі фахівцю","prerequisite":"Перевірені матеріали, межі відповідей і передача складних питань людині"},
+    "knowledge":{"label":"Пошук відповідей у перевірених матеріалах команди","metric":"Час пошуку, точність посилання на джерело і частка невідповіданих питань","prerequisite":"Актуальний набір матеріалів, доступи та фахівець для перевірки"},
+    "reporting":{"label":"Підготовка одного повторюваного звіту","metric":"Час підготовки, розбіжності з джерелами і час перевірки","prerequisite":"Зразок звіту, визначення показників і доступні вхідні дані"},
+    "intelligence":{"label":"Один цикл збору й аналізу зовнішніх сигналів","metric":"Частка корисних сигналів, час перевірки і рішення за їх результатами","prerequisite":"Теми, допустимі джерела та відповідальний за рішення"}
+  },
+  "sector_examples": {
+    "trade":["каталог і запити","замовлення та повернення"],
+    "services":["звернення та пропозиції","договори й пошук знань"],
+    "manufacturing":["специфікації та закупівлі","документи якості"],
+    "agriculture":["закупівлі та сезонне планування","звітність і ринкові сигнали"],
+    "nonprofit":["заявки та гранти","звітність за програмами"],
+    "mixed":["один спільний процес між напрямами"],
+    "other":["повторювана інформаційна робота з вимірюваним результатом"]
+  }
+}

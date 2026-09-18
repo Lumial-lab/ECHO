@@ -12,6 +12,7 @@
 """
 from __future__ import annotations
 import json
+import math
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -60,11 +61,12 @@ class ScanResult:
     """Повний результат сканування."""
     scoring_version: str
     axes: dict[str, AxisScore]
-    digital_substrate_level: int  # 0-4
-    digital_substrate_code: str   # D0-D4
+    digital_substrate_level: int | None  # None means not measured
+    digital_substrate_code: str   # D0-D4 or UNKNOWN
     tags: list[str]               # зібрані теги рекомендацій
     answers_count: int
     total_questions: int
+    consultation_topics: list[dict[str, str]] = field(default_factory=list)
 
 
 # ── Перевірка умов (branching / gating) ──────────────────────
@@ -100,7 +102,62 @@ def _check_condition(condition: dict | None, answers: dict[str, Any]) -> bool:
         "not_in": lambda a, e: a not in e,
         "contains": lambda a, e: e in a if isinstance(a, (list, str)) else False,
     }
-    return ops.get(op, lambda a, e: False)(actual, expected)
+    try:
+        return ops.get(op, lambda a, e: False)(actual, expected)
+    except (TypeError, ValueError):
+        return False
+
+
+def visible_questions(config: dict, answers: dict[str, Any]) -> tuple[list[dict], dict]:
+    """Resolve forward-only branches using validated, visible answers only."""
+    visible, active = [], {}
+    for screen in config["screens"]:
+        if not _check_condition(screen.get("show_if"), active):
+            continue
+        for question in screen["questions"]:
+            if not _check_condition(question.get("show_if"), active):
+                continue
+            visible.append(question)
+            value = answers.get(question["id"])
+            if value is None or value == "" or value == []:
+                continue
+            _validate_answer(question, value)
+            active[question["id"]] = value
+    return visible, active
+
+
+def _validate_answer(question: dict, value: Any) -> None:
+    kind = question["type"]
+    valid = True
+    if kind in ("single_choice", "multi_choice"):
+        options = {option["value"]: option for option in question.get("options", [])}
+        values = value if kind == "multi_choice" else [value]
+        valid = isinstance(values, list) and all(isinstance(v, str) and v in options for v in values)
+        if valid:
+            valid = len(values) == len(set(values))
+            valid = valid and not (len(values) > 1 and any(options[v].get("exclusive") for v in values))
+    elif kind in ("number", "scale"):
+        valid = not isinstance(value, bool) and isinstance(value, (int, float)) and math.isfinite(value)
+        if valid:
+            valid = question.get("minimum", -math.inf) <= value <= question.get("maximum", math.inf)
+    elif kind == "text":
+        valid = isinstance(value, str) and len(value) <= question.get("max_length", 1000)
+    if not valid:
+        raise ValueError(f"Invalid answer: {question['id']}")
+
+
+def _points(spec: float | dict, answer: Any, question: dict) -> float | None:
+    excluded = {o["value"] for o in question.get("options", []) if o.get("non_scoring")}
+    values = answer if isinstance(answer, list) else [answer]
+    values = [v for v in values if v not in excluded]
+    if not values:
+        return None
+    if isinstance(spec, dict):
+        mapped = [spec[str(v)] for v in values if str(v) in spec]
+        if not mapped:
+            return None
+        return max(0.0, min(4.0, sum(mapped)))
+    return max(0.0, min(4.0, float(spec)))
 
 
 # ── Основний рушій ───────────────────────────────────────────
@@ -131,79 +188,51 @@ def score(config: dict, answers: dict[str, Any]) -> ScanResult:
     ds_weight = 0.0
 
     all_tags: list[str] = []
-    total_questions = 0
-
-    # Обхід екранів і питань
-    for screen in config["screens"]:
-        if not _check_condition(screen.get("show_if"), answers):
+    questions, active = visible_questions(config, answers)
+    counted: dict[str, set[str]] = {axis: set() for axis in axes}
+    topics = []
+    comments = answers.get("_comments", {})
+    if not isinstance(comments, dict):
+        raise ValueError("Invalid comments")
+    for q in questions:
+        answer = active.get(q["id"])
+        comment = comments.get(q["id"], "")
+        if not isinstance(comment, str) or len(comment) > 1000:
+            raise ValueError(f"Invalid comment: {q['id']}")
+        other = answer == "other" or isinstance(answer, list) and "other" in answer
+        if comment.strip() or other:
+            topics.append({"question_id": q["id"], "question": q["text"], "text": comment.strip(),
+                           "status": "INDIVIDUAL_CONSULTATION_TOPIC"})
+        if answer is None:
             continue
-
-        for q in screen["questions"]:
-            total_questions += 1
-            if not _check_condition(q.get("show_if"), answers):
+        for rule in q.get("scoring_rules", []):
+            if not _check_condition(rule.get("condition"), active):
                 continue
-
-            answer = answers.get(q["id"])
-            if answer is None:
+            axis_id, weight = rule["axis_id"], rule.get("weight", 1.0)
+            if axis_id not in axes or weight <= 0:
                 continue
+            points = _points(rule["points"], answer, q)
+            if points is None:
+                continue
+            axes[axis_id].raw_points += points * weight
+            axes[axis_id].total_weight += weight
+            counted[axis_id].add(q["id"])
+            all_tags.extend(rule.get("tags", []))
+        ds_rule = q.get("digital_substrate_rule")
+        if ds_rule:
+            weight = ds_rule.get("weight", 1.0)
+            points = _points(ds_rule["points"], answer, q)
+            if points is not None and weight > 0:
+                ds_points += points * weight
+                ds_weight += weight
 
-            # Scoring rules → axes
-            for rule in q.get("scoring_rules", []):
-                if not _check_condition(rule.get("condition"), answers):
-                    continue
-
-                axis_id = rule["axis_id"]
-                if axis_id not in axes:
-                    continue
-
-                weight = rule.get("weight", 1.0)
-                points_spec = rule["points"]
-
-                if isinstance(points_spec, dict):
-                    # mapping: answer_value → points
-                    key = str(answer) if not isinstance(answer, list) else None
-                    if key and key in points_spec:
-                        pts = points_spec[key] * weight
-                    elif isinstance(answer, list):
-                        # multi_choice: сума по обраних
-                        pts = sum(points_spec.get(str(v), 0) for v in answer) * weight
-                    else:
-                        pts = 0
-                else:
-                    pts = float(points_spec) * weight
-
-                axes[axis_id].raw_points += pts
-                axes[axis_id].total_weight += weight * 4.0  # нормалізація до 0-4
-                axes[axis_id].question_count += 1
-
-                all_tags.extend(rule.get("tags", []))
-
-            # Digital substrate rule
-            ds_rule = q.get("digital_substrate_rule")
-            if ds_rule:
-                ds_w = ds_rule.get("weight", 1.0)
-                ds_pts = ds_rule["points"]
-                if isinstance(ds_pts, dict):
-                    key = str(answer) if not isinstance(answer, list) else None
-                    if key and key in ds_pts:
-                        ds_points += ds_pts[key] * ds_w
-                        ds_weight += ds_w
-                else:
-                    ds_points += float(ds_pts) * ds_w
-                    ds_weight += ds_w
-
-    # Digital Substrate Level
-    if ds_weight > 0:
-        ds_raw = ds_points / ds_weight
-    else:
-        ds_raw = 0
-
-    # Округлення до найближчого рівня D0-D4
-    ds_level = max(0, min(4, round(ds_raw)))
-    ds_code = f"D{ds_level}"
+    for axis_id, ids in counted.items():
+        axes[axis_id].question_count = len(ids)
+    ds_level = max(0, min(4, round(ds_points / ds_weight))) if ds_weight else None
+    ds_code = f"D{ds_level}" if ds_level is not None else "UNKNOWN"
 
     # Правило з брифу: D0-D1 → тег DIGITAL_FOUNDATION_REQUIRED
-    if ds_level <= 1:
+    if ds_level is not None and ds_level <= 1:
         all_tags.append("DIGITAL_FOUNDATION_REQUIRED")
 
     return ScanResult(
@@ -212,8 +241,9 @@ def score(config: dict, answers: dict[str, Any]) -> ScanResult:
         digital_substrate_level=ds_level,
         digital_substrate_code=ds_code,
         tags=sorted(set(all_tags)),
-        answers_count=len(answers),
-        total_questions=total_questions,
+        answers_count=len(active),
+        total_questions=len(questions),
+        consultation_topics=topics,
     )
 
 
