@@ -130,21 +130,31 @@ def _parent_conclusion(node: dict, limit: int = 2600) -> str:
     # рядок як шлях і мовчки повертала порожнє — контрактний тест це зловив
     # раніше за перший прохід Рою. Беремо перший токен, схожий на файл артефакту.
     import re as _re
+    # Д195 — ПРОЗА ВОРІТ ТЕЖ Є ВИСНОВКОМ. Дефект Д188 («годував заголовками»)
+    # полагоджено для батьків, доведених РОЄМ: там proof — шлях до артефакту.
+    # Але вузол, доведений МНОЮ вручну, несе у proof не шлях, а сам висновок
+    # текстом (B1.6: «лінія M = метакогніція…, формат = Notion-шаблон»). Старий
+    # код вимагав файл і мовчки повертав порожнє — тобто рівно ті вузли, де
+    # висновок ухвалив субʼєкт, ішли в промпт самою НАЗВОЮ. Тепер: файл, якщо
+    # він читається; інакше — сама проза воріт.
+    _prose = proof[:limit].strip()
     m = _re.search(r"[^\s|]+\.(?:md|txt|json)", proof, _re.I)
     if not m:
-        return ""
+        return _prose
     proof = m.group(0)
     cand = Path(proof)
     if not cand.is_absolute():
         cand = HERE.parent / proof
     if not cand.exists():
+        cand = HERE / proof          # граф і матеріали треку живуть поруч
+    if not cand.exists():
         cand = ARTIFACTS / Path(proof).name
     if not cand.exists() or cand.suffix.lower() not in (".md", ".txt", ".json"):
-        return ""
+        return _prose
     try:
         txt = cand.read_text(encoding="utf-8", errors="replace")
     except OSError:
-        return ""
+        return _prose
     # Від маркера — ПЕРШІ `limit` символів, не останні: «відповідь по суті» у
     # приписі робітника стоїть першим пунктом КРОКУ 2, а межі й ризики — останніми.
     # Перша версія різала з кінця й лишала самі застереження без висновку.
@@ -246,15 +256,33 @@ def run_once(dag: str, dry: bool = False) -> int:
         return base, base + " " + " ".join(n.get("notes") or [])
 
     ready_auto = []
+    # Д195 — ЧОМУ ПОРОЖНЬО, А НЕ ЛИШЕ ЩО ПОРОЖНЬО. 700 із 755 записів журналу
+    # мали ОДНУ причину «немає ready-вузлів з [auto]», і вона правдива, але
+    # склеює три РІЗНІ стани світу: (1) вузли з тегом стоять у candidate і
+    # чекають воріт субʼєкта; (2) готові вузли є, але тег їм не поставлено;
+    # (3) готовий вузол з тегом заборонено через [auto:off]. Лічильник, що
+    # рахує кількість, а не ПРИЧИНУ, не аудитується — тому причина їде в лог.
+    blocked_why = {"candidate_waiting_gate": 0, "ready_without_tag": 0,
+                   "auto_off": 0, "blocked_deps": 0}
     for n in nodes.values():
-        if n["status"] != "ready":
-            continue
         base, full = _tags(n)
-        if "[auto]" in base and "[auto:off]" not in full:
+        tagged = "[auto]" in base
+        if n["status"] != "ready":
+            if tagged and n["status"] == "candidate":
+                blocked_why["candidate_waiting_gate"] += 1
+            elif tagged and n["status"] == "blocked":
+                blocked_why["blocked_deps"] += 1
+            continue
+        if not tagged:
+            blocked_why["ready_without_tag"] += 1
+        elif "[auto:off]" in full:
+            blocked_why["auto_off"] += 1
+        else:
             ready_auto.append(n)
     if not ready_auto:
-        _log({"event": "idle", "dag": dag, "reason": "немає ready-вузлів з [auto]"})
-        print("Рій: живий, роботи немає (ready+[auto] = 0).")
+        _log({"event": "idle", "dag": dag, "reason": "немає ready-вузлів з [auto]",
+              "why": blocked_why})
+        print(f"Рій: живий, роботи немає (ready+[auto] = 0). Причини: {blocked_why}")
         return 0
 
     day_used = _budget_today()
