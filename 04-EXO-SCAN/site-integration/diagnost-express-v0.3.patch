@@ -83,22 +83,32 @@ index 3a4c289..9f6e89d 100644
      "astro": "^5.0.0",
 diff --git a/src/components/ExoDiagnost.astro b/src/components/ExoDiagnost.astro
 new file mode 100644
-index 0000000..1824587
+index 0000000..52589d9
 --- /dev/null
 +++ b/src/components/ExoDiagnost.astro
-@@ -0,0 +1,367 @@
+@@ -0,0 +1,413 @@
 +---
-+interface Props { contactEmail: string }
-+const { contactEmail } = Astro.props;
++interface Props {
++  contactEmail: string;
++  whatsappUrl: string;
++  telegramUrl: string;
++}
++const { contactEmail, whatsappUrl, telegramUrl } = Astro.props;
 +---
 +
-+<section class="diagnost" data-diagnost data-contact-email={contactEmail}>
++<section
++  class="diagnost"
++  data-diagnost
++  data-contact-email={contactEmail}
++  data-whatsapp-url={whatsappUrl}
++  data-telegram-url={telegramUrl}
++>
 +  <header class="diagnost-hero">
-+    <p class="diagnost-hero__kicker">ЕХО · ПОПЕРЕДНЯ ДІАГНОСТИКА</p>
-+    <h1 class="diagnost-hero__title">ЕХО Діагност</h1>
++    <p class="diagnost-hero__kicker">ДЛЯ КЕРІВНИКІВ ПІДПРИЄМСТВ ТА ОРГАНІЗАЦІЙ</p>
++    <h1 class="diagnost-hero__title">ЕХО Діагност для бізнесу</h1>
 +    <p class="diagnost-hero__lede">
-+      Знайдіть перший процес, у якому АІ може дати вимірюваний результат,
-+      і побачте, що потрібно підготувати для безпечного пілота.
++      Оцініть один робочий процес вашого підприємства: де АІ може дати
++      вимірюваний результат і що потрібно підготувати для безпечного пілота.
 +    </p>
 +  </header>
 +
@@ -111,10 +121,11 @@ index 0000000..1824587
 +  <section class="diagnost-intro" data-intro>
 +    <div>
 +      <p class="diagnost-eyebrow">Що ви отримаєте</p>
-+      <h2>Один предметний наступний крок</h2>
++      <h2>Перший предметний крок для вашої організації</h2>
 +      <p>
 +        Діагност розділяє потенціал користі, готовність процесів і здатність
-+        провести пілот. Це самооцінка для першої розмови, не аудит підприємства.
++        провести пілот. Це управлінська самооцінка для першої розмови,
++        не споживчий тест і не аудит підприємства.
 +      </p>
 +    </div>
 +    <div class="diagnost-intro__actions">
@@ -192,8 +203,36 @@ index 0000000..1824587
 +      <div class="diagnost-packages__list" data-packages></div>
 +    </section>
 +
++    <section class="diagnost-consult" aria-labelledby="consult-title">
++      <p class="diagnost-eyebrow">Перетворіть результат на план дій</p>
++      <h3 id="consult-title">Запишіться на онлайн-консультацію</h3>
++      <p>
++        Разом перевіримо висновок Діагноста, оберемо процес для першого пілота
++        та визначимо потрібні дані, межі безпеки й критерій користі.
++      </p>
++      <ul>
++        <li>предметний розбір вашої ситуації;</li>
++        <li>перший реалістичний сценарій упровадження;</li>
++        <li>розуміння обсягу, ризиків і наступних дій.</li>
++      </ul>
++      <div class="diagnost-consult__actions">
++        <a class="diagnost-button diagnost-button--primary" data-contact href="/kontakty/">
++          Записатися на онлайн-консультацію
++        </a>
++        <a class="diagnost-button diagnost-button--secondary" data-whatsapp href={whatsappUrl}>
++          Написати у WhatsApp
++        </a>
++      </div>
++      <p class="diagnost-consult__alternative">
++        Зручніше у Telegram? <a data-telegram href={telegramUrl}>Напишіть нам</a>.
++      </p>
++      <p class="diagnost-consult__privacy">
++        У звернення підставляється лише код результату та рекомендований напрямок,
++        не ваші відповіді.
++      </p>
++    </section>
++
 +    <div class="diagnost-result__actions">
-+      <a class="diagnost-button diagnost-button--primary" data-contact href="/kontakty/">Обговорити результат</a>
 +      <button class="diagnost-button diagnost-button--secondary" type="button" data-print>Зберегти як PDF</button>
 +      <button class="diagnost-link-button" type="button" data-restart>Пройти ще раз</button>
 +    </div>
@@ -236,6 +275,8 @@ index 0000000..1824587
 +    const error = root.querySelector('[data-error]');
 +    const announcer = root.querySelector('[data-announcer]');
 +    const contactEmail = root.getAttribute('data-contact-email') || '';
++    const whatsappUrl = root.getAttribute('data-whatsapp-url') || '';
++    const telegramUrl = root.getAttribute('data-telegram-url') || '';
 +
 +    let currentIndex = 0;
 +    let answers = {};
@@ -395,10 +436,15 @@ index 0000000..1824587
 +        packages.append(article);
 +      }
 +
-+      const subject = encodeURIComponent(`ЕХО Діагност · ${result.resultCode}`);
-+      const body = encodeURIComponent(`Добрий день! Я пройшов/ла ЕХО Діагност.\n\nКод результату: ${result.resultCode}\nРекомендований напрямок: ${result.title}\n\nХочу обговорити можливий перший крок.`);
++      const subject = encodeURIComponent(`Онлайн-консультація за результатом ЕХО Діагност · ${result.resultCode}`);
++      const message = `Добрий день! Я пройшов/ла ЕХО Діагност для бізнесу.\n\nКод результату: ${result.resultCode}\nРекомендований напрямок: ${result.title}\n\nХочу записатися на онлайн-консультацію та визначити перший практичний крок.`;
++      const body = encodeURIComponent(message);
 +      const contact = root.querySelector('[data-contact]');
 +      contact.href = contactEmail ? `mailto:${contactEmail}?subject=${subject}&body=${body}` : '/kontakty/';
++      const whatsapp = root.querySelector('[data-whatsapp]');
++      whatsapp.href = whatsappUrl ? `${whatsappUrl}${whatsappUrl.includes('?') ? '&' : '?'}text=${body}` : '/kontakty/';
++      const telegram = root.querySelector('[data-telegram]');
++      telegram.href = telegramUrl || '/kontakty/';
 +
 +      announcer.textContent = `Діагностику завершено. ${result.title}`;
 +      scrollToTool(resultView);
@@ -454,6 +500,39 @@ index 0000000..1824587
 +    printButton.addEventListener('click', () => window.print());
 +  }
 +</script>
+diff --git a/src/components/PracticeCard.astro b/src/components/PracticeCard.astro
+index bb118e4..af33d30 100644
+--- a/src/components/PracticeCard.astro
++++ b/src/components/PracticeCard.astro
+@@ -7,6 +7,7 @@
+  *   drop?    { x, y, w, h }   — положення малої краплі, дає варіацію силуету
+  *   delay?   string = '1.7s'  — затримка появи (ритм сітки)
+  *   mesh?    boolean = false  — показати схему-мережу (тільки блок AI)
++ *   action?  { href, label }  — одна предметна дія для напряму
+  * Slot: опис напряму.
+  */
+ import MercuryOrb from './MercuryOrb.astro';
+@@ -18,8 +19,9 @@ interface Props {
+   drop?: { x: number; y: number; w: number; h: number };
+   delay?: string;
+   mesh?: boolean;
++  action?: { href: string; label: string };
+ }
+-const { title, mono = false, drop, delay = '1.7s', mesh = false } = Astro.props;
++const { title, mono = false, drop, delay = '1.7s', mesh = false, action } = Astro.props;
+ ---
+ <article class="practice" style={`--delay:${delay}`}>
+   {mesh && <NeuralMesh />}
+@@ -27,4 +29,9 @@ const { title, mono = false, drop, delay = '1.7s', mesh = false } = Astro.props;
+   <div class="practice__rule"></div>
+   <h2 class:list={['practice__title', 'plate', { 'practice__title--mono': mono }]}>{title}</h2>
+   <p class="practice__text"><slot /></p>
++  {action && (
++    <a class="practice__action" href={action.href}>
++      {action.label}<span aria-hidden="true"> →</span>
++    </a>
++  )}
+ </article>
 diff --git a/src/components/SiteHeader.astro b/src/components/SiteHeader.astro
 index fad2491..4378abd 100644
 --- a/src/components/SiteHeader.astro
@@ -480,28 +559,44 @@ index fad2491..4378abd 100644
 -  <LangSwitch lang={lang} />
 +  {showLanguageSwitch && <LangSwitch lang={lang} />}
  </header>
+diff --git a/src/content/config.ts b/src/content/config.ts
+index 6738fd5..f689760 100644
+--- a/src/content/config.ts
++++ b/src/content/config.ts
+@@ -22,6 +22,8 @@ const practices = defineCollection({
+     drop: z.object({ x: z.number(), y: z.number(), w: z.number(), h: z.number() }),
+     /** затримка появи, тримає ритм сітки */
+     delay: z.string().default('1.7s'),
++    /** предметна дія всередині напряму; не конкурує з головним CTA */
++    action: z.object({ href: z.string(), label: z.string() }).optional(),
+   }),
+ });
+ 
+diff --git a/src/content/practices/uk-ai.md b/src/content/practices/uk-ai.md
+index 0b931fb..690bf49 100644
+--- a/src/content/practices/uk-ai.md
++++ b/src/content/practices/uk-ai.md
+@@ -6,6 +6,9 @@ mono: true
+ mesh: true
+ drop: { x: 123, y: 93, w: 52, h: 55 }
+ delay: "1.9s"
++action:
++  href: "/ai-diagnost/"
++  label: "Перевірити готовність вашого бізнесу"
+ ---
+ 
+ Спеціалізована AI-система для органів місцевого самоврядування (проєкт «Юридичні Сили України»©). AI-супровід юридичної роботи та процесів управління підприємством.
 diff --git a/src/data/uk.json b/src/data/uk.json
-index e1006c9..207fda2 100644
+index e1006c9..40cbde4 100644
 --- a/src/data/uk.json
 +++ b/src/data/uk.json
-@@ -15,6 +15,10 @@
-       "href": "/praktyky/",
-       "label": "ПРАКТИКИ"
-     },
-+    {
-+      "href": "/ai-diagnost/",
-+      "label": "AI-ДІАГНОСТ"
-+    },
-     {
-       "href": "/publikatsii/",
-       "label": "ПУБЛІКАЦІЇ"
-@@ -123,6 +127,10 @@
+@@ -123,6 +123,10 @@
        "title": "Напрями практики — Наталія Целовальніченко",
        "description": "Відшкодування шкоди потерпілим внаслідок російської агресії, захист військових, AI-системи, кримінальні та цивільні справи, спори з органами влади."
      },
 +    "diagnost": {
-+      "title": "ЕХО Діагност — готовність підприємства до впровадження АІ",
-+      "description": "Коротка самооцінка готовності процесів, даних і команди до безпечного пілота АІ-системи. Результат без реєстрації."
++      "title": "ЕХО Діагност для бізнесу — готовність підприємства до АІ",
++      "description": "Коротка управлінська самооцінка готовності підприємства або організації до безпечного пілота АІ-системи. 12 питань, результат без реєстрації."
 +    },
      "publications": {
        "title": "Публікації та згадки в медіа — Наталія Целовальніченко",
@@ -946,10 +1041,10 @@ index 0000000..deba1fe
 +}
 diff --git a/src/pages/ai-diagnost.astro b/src/pages/ai-diagnost.astro
 new file mode 100644
-index 0000000..69bc509
+index 0000000..82e0460
 --- /dev/null
 +++ b/src/pages/ai-diagnost.astro
-@@ -0,0 +1,17 @@
+@@ -0,0 +1,21 @@
 +---
 +import BaseLayout from '../layouts/BaseLayout.astro';
 +import ContactBand from '../components/ContactBand.astro';
@@ -964,15 +1059,70 @@ index 0000000..69bc509
 +  description={t.meta.diagnost.description}
 +  showLanguageSwitch={false}
 +>
-+  <ExoDiagnost contactEmail={t.contacts.mail} />
++  <ExoDiagnost
++    contactEmail={t.contacts.mail}
++    whatsappUrl={t.contacts.whatsapp}
++    telegramUrl={t.contacts.telegram}
++  />
 +  <ContactBand slot="band" contacts={t.contacts} />
 +</BaseLayout>
+diff --git a/src/pages/index.astro b/src/pages/index.astro
+index c79b4c5..48987b4 100644
+--- a/src/pages/index.astro
++++ b/src/pages/index.astro
+@@ -36,6 +36,7 @@ const practices = (await getCollection('practices', (p) => p.data.lang === 'uk')
+         mesh={p.data.mesh}
+         drop={p.data.drop}
+         delay={p.data.delay}
++        action={p.data.action}
+       >
+         <Fragment set:html={p.body} />
+       </PracticeCard>
+diff --git a/src/pages/praktyky.astro b/src/pages/praktyky.astro
+index c55da3c..48ce6ce 100644
+--- a/src/pages/praktyky.astro
++++ b/src/pages/praktyky.astro
+@@ -20,6 +20,7 @@ const practices = (await getCollection('practices', (p) => p.data.lang === 'uk')
+         mesh={p.data.mesh}
+         drop={p.data.drop}
+         delay={p.data.delay}
++        action={p.data.action}
+       >
+         <Fragment set:html={p.body} />
+       </PracticeCard>
+diff --git a/src/styles/components.css b/src/styles/components.css
+index 817211b..fb6f326 100644
+--- a/src/styles/components.css
++++ b/src/styles/components.css
+@@ -296,6 +296,22 @@
+   font-size: var(--t-body); line-height: var(--lh-body);
+   letter-spacing: 0.01em; color: var(--c-text);
+ }
++.practice__action {
++  position: relative;
++  display: inline-block;
++  margin-top: 18px;
++  padding-bottom: 4px;
++  border-bottom: 2px solid var(--c-accent);
++  color: var(--c-text-strong);
++  font-size: var(--t-body);
++  font-weight: 700;
++  line-height: 1.45;
++  text-decoration: none;
++}
++.practice__action:hover,
++.practice__action:focus-visible {
++  color: var(--c-accent);
++}
+ 
+ /* ═══ Заголовок розділу ═══ */
+ .section { position: relative; max-width: var(--w-page); margin: var(--sp-section) auto 0; }
 diff --git a/src/styles/diagnost.css b/src/styles/diagnost.css
 new file mode 100644
-index 0000000..5ca90cd
+index 0000000..56dfcd0
 --- /dev/null
 +++ b/src/styles/diagnost.css
-@@ -0,0 +1,583 @@
+@@ -0,0 +1,630 @@
 +.diagnost {
 +  --diagnost-border: rgba(45, 57, 68, 0.3);
 +  --diagnost-surface: rgba(252, 253, 254, 0.94);
@@ -1456,13 +1606,59 @@ index 0000000..5ca90cd
 +  line-height: 1.2;
 +}
 +
-+.diagnost-result__actions {
-+  display: grid;
-+  grid-template-columns: repeat(2, minmax(0, 1fr));
++.diagnost-consult {
 +  margin-top: 38px;
++  padding: 30px 0;
++  border-top: 2px solid var(--c-accent);
++  border-bottom: 1px solid var(--diagnost-border);
 +}
 +
-+.diagnost-result__actions .diagnost-link-button { grid-column: 1 / -1; justify-self: center; }
++.diagnost-consult h3 {
++  margin: 8px 0 0;
++  font-family: var(--f-serif);
++  font-size: clamp(1.8rem, 4vw, 2.5rem);
++  line-height: 1.15;
++}
++
++.diagnost-consult > p:not(.diagnost-eyebrow) {
++  max-width: 760px;
++  margin-top: 14px;
++  line-height: 1.65;
++}
++
++.diagnost-consult ul {
++  display: grid;
++  gap: 8px;
++  margin: 18px 0 0;
++  padding-left: 22px;
++}
++
++.diagnost-consult__actions {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 12px;
++  margin-top: 24px;
++}
++
++.diagnost-consult__alternative a {
++  color: var(--c-text-strong);
++  font-weight: 700;
++  text-decoration-color: var(--c-accent);
++  text-underline-offset: 4px;
++}
++
++.diagnost-consult .diagnost-consult__privacy {
++  font-size: 0.9rem;
++  color: var(--c-text-muted);
++}
++
++.diagnost-result__actions {
++  display: flex;
++  align-items: center;
++  justify-content: space-between;
++  gap: 14px;
++  margin-top: 22px;
++}
 +
 +.diagnost-result__code,
 +.diagnost-disclaimer {
@@ -1526,8 +1722,8 @@ index 0000000..5ca90cd
 +  .diagnost-navigation .diagnost-button { min-width: 0; padding-inline: 12px; }
 +  .diagnost-indicator__copy { display: grid; gap: 2px; }
 +  .diagnost-indicator__copy strong { text-align: left; }
-+  .diagnost-result__actions { grid-template-columns: 1fr; }
-+  .diagnost-result__actions .diagnost-link-button { grid-column: auto; }
++  .diagnost-consult__actions { grid-template-columns: 1fr; }
++  .diagnost-result__actions { align-items: stretch; flex-direction: column; }
 +}
 +
 +@media (prefers-reduced-motion: reduce) {
@@ -1550,6 +1746,7 @@ index 0000000..5ca90cd
 +  .diagnost-trust,
 +  .diagnost-intro,
 +  .diagnost-tool,
++  .diagnost-consult__actions,
 +  .diagnost-result__actions { display: none !important; }
 +  .page { padding: 0; background: #fff; }
 +  .diagnost { margin: 0; max-width: none; }
