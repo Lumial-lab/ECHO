@@ -1,0 +1,1657 @@
+diff --git a/.gitignore b/.gitignore
+index f523bf0..a6dd89e 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,5 +2,7 @@ node_modules/
+ **/node_modules/**
+ dist/
+ .astro/
++.playwright-cli/
++output/
+ .env
+ .DS_Store
+diff --git a/DESIGN.md b/DESIGN.md
+new file mode 100644
+index 0000000..efe17b0
+--- /dev/null
++++ b/DESIGN.md
+@@ -0,0 +1,51 @@
++# DESIGN.md
++
++## Brand / Product Context
++
++- product: ЕХО Діагност Express на сайті адвокатки Наталії Целовальніченко;
++- audience: власники й керівники підприємств без обов'язкової технічної підготовки;
++- tone: точний, спокійний, преміальний legal-tech;
++- must feel: зрозуміло, безпечно, предметно, доросло;
++- must not feel: тест-іграшка, AI-магія, агресивна воронка або великий аудит.
++
++## Assets
++
++- logo: `src/assets/logo-light.png`;
++- visual language: наявна Mercury-система, рідкий метал і цифрова фактура;
++- product imagery: не потрібна, бо перший екран є робочим інструментом;
++- source of truth: `src/styles/tokens.css` і `ПАСПОРТ.md`.
++
++## Tokens
++
++- color: холодне світле полотно, графітовий текст, фірмовий червоний для дії;
++  у результатах додатково допускаються стримані зелений і синьо-зелений;
++- typography: Manrope для інтерфейсу, Cormorant Garamond лише для назви продукту,
++  IBM Plex Mono для службових міток;
++- spacing: 8 px базовий ритм, широкі поля навколо питання;
++- radius: 0-8 px, без м'яких SaaS-пігулок;
++- borders/shadows: тонкі графітові лінії, одна неглибока тінь лише для інструмента;
++- motion: короткі переходи стану; без декоративного руху під час читання питання.
++
++## Components
++
++- buttons: прямокутні, не менше 48 px, чіткий primary/secondary;
++- forms: нативні radio, вся відповідь є клікабельним рядком;
++- panels: одна рамка для Діагноста, без вкладених карток;
++- progress: текстовий крок плюс лінійний індикатор;
++- result: три горизонтальні показники, один рекомендований маршрут, три формати;
++- navigation: окремі «Назад» і «Далі», стан не змінює геометрію панелі.
++
++## Rules And Rationale
++
++- Спочатку питання, потім пояснення. Керівник не читає методологічну лекцію.
++- Числова псевдоточність не показується. Самооцінка повертає діапазон і підстави.
++- Перший результат не вимагає контакту. Це доводить цінність до конверсії.
++- Відповіді не виходять із браузера без окремої дії користувача.
++- Акцентний червоний означає команду або ключовий висновок, не декор.
++
++## Anti-Patterns
++
++- уникати радарів із балами за однією відповіддю;
++- уникати великих героїв, карток у картках, дрібного сірого тексту й AI-іконографії;
++- не називати результат аудитом, сертифікацією або юридичним висновком;
++- не обіцяти економію чи строки впровадження без вимірювання вихідного стану.
+diff --git a/package.json b/package.json
+index 3a4c289..9f6e89d 100644
+--- a/package.json
++++ b/package.json
+@@ -5,7 +5,8 @@
+   "scripts": {
+     "dev": "astro dev",
+     "build": "astro build",
+-    "preview": "astro preview"
++    "preview": "astro preview",
++    "test:diagnost": "node --test tests/diagnost-express.test.mjs"
+   },
+   "dependencies": {
+     "astro": "^5.0.0",
+diff --git a/src/components/ExoDiagnost.astro b/src/components/ExoDiagnost.astro
+new file mode 100644
+index 0000000..1824587
+--- /dev/null
++++ b/src/components/ExoDiagnost.astro
+@@ -0,0 +1,367 @@
++---
++interface Props { contactEmail: string }
++const { contactEmail } = Astro.props;
++---
++
++<section class="diagnost" data-diagnost data-contact-email={contactEmail}>
++  <header class="diagnost-hero">
++    <p class="diagnost-hero__kicker">ЕХО · ПОПЕРЕДНЯ ДІАГНОСТИКА</p>
++    <h1 class="diagnost-hero__title">ЕХО Діагност</h1>
++    <p class="diagnost-hero__lede">
++      Знайдіть перший процес, у якому АІ може дати вимірюваний результат,
++      і побачте, що потрібно підготувати для безпечного пілота.
++    </p>
++  </header>
++
++  <div class="diagnost-trust" aria-label="Умови проходження">
++    <span>12 коротких питань</span>
++    <span>без реєстрації</span>
++    <span>відповіді лишаються у браузері</span>
++  </div>
++
++  <section class="diagnost-intro" data-intro>
++    <div>
++      <p class="diagnost-eyebrow">Що ви отримаєте</p>
++      <h2>Один предметний наступний крок</h2>
++      <p>
++        Діагност розділяє потенціал користі, готовність процесів і здатність
++        провести пілот. Це самооцінка для першої розмови, не аудит підприємства.
++      </p>
++    </div>
++    <div class="diagnost-intro__actions">
++      <button class="diagnost-button diagnost-button--primary" type="button" data-start>
++        Почати діагностику
++      </button>
++      <button class="diagnost-link-button" type="button" data-clear hidden>
++        Скинути збережений прогрес
++      </button>
++    </div>
++  </section>
++
++  <form class="diagnost-tool" data-tool hidden novalidate>
++    <div class="diagnost-progress">
++      <div class="diagnost-progress__meta">
++        <span data-group>Контекст</span>
++        <span data-progress-label>Крок 1 із 12</span>
++      </div>
++      <div class="diagnost-progress__track" role="progressbar" aria-valuemin="1" aria-valuemax="12" aria-valuenow="1" data-progress>
++        <span data-progress-bar></span>
++      </div>
++    </div>
++
++    <fieldset class="diagnost-question">
++      <legend class="diagnost-question__title" data-question tabindex="-1"></legend>
++      <p class="diagnost-question__hint" id="diagnost-hint" data-hint></p>
++      <div class="diagnost-options" data-options aria-describedby="diagnost-hint"></div>
++      <label class="diagnost-own" data-own-wrap hidden>
++        <span>Коротко уточніть свою відповідь</span>
++        <textarea data-own rows="3" maxlength="500" placeholder="Необов’язкове уточнення для майбутньої консультації"></textarea>
++      </label>
++      <p class="diagnost-error" data-error role="alert" hidden>Оберіть один варіант, щоб продовжити.</p>
++    </fieldset>
++
++    <div class="diagnost-navigation">
++      <button class="diagnost-button diagnost-button--secondary" type="button" data-back>Назад</button>
++      <button class="diagnost-button diagnost-button--primary" type="submit" data-next>Далі</button>
++    </div>
++  </form>
++
++  <section class="diagnost-result" data-result hidden aria-live="polite">
++    <header class="diagnost-result__header">
++      <p class="diagnost-eyebrow">Попередній результат</p>
++      <h2 data-result-title></h2>
++      <p data-result-summary></p>
++    </header>
++
++    <div class="diagnost-indicators" data-indicators></div>
++    <p class="diagnost-evidence" data-evidence></p>
++
++    <section class="diagnost-route" aria-labelledby="route-title">
++      <div>
++        <p class="diagnost-eyebrow">Перший крок</p>
++        <h3 id="route-title" data-first-step-title></h3>
++        <p data-first-step></p>
++      </div>
++      <div>
++        <p class="diagnost-eyebrow">Перевірка користі</p>
++        <h3 data-pilot-title></h3>
++        <p data-pilot></p>
++        <p class="diagnost-metric"><strong>Вимірюємо:</strong> <span data-metric></span></p>
++      </div>
++    </section>
++
++    <section class="diagnost-signals" aria-labelledby="signals-title">
++      <h3 id="signals-title">На чому тримається висновок</h3>
++      <ul data-signals></ul>
++    </section>
++
++    <section class="diagnost-packages" aria-labelledby="packages-title">
++      <div class="diagnost-packages__heading">
++        <p class="diagnost-eyebrow">Три масштаби співпраці</p>
++        <h3 id="packages-title">Рекомендований формат позначено нижче</h3>
++      </div>
++      <div class="diagnost-packages__list" data-packages></div>
++    </section>
++
++    <div class="diagnost-result__actions">
++      <a class="diagnost-button diagnost-button--primary" data-contact href="/kontakty/">Обговорити результат</a>
++      <button class="diagnost-button diagnost-button--secondary" type="button" data-print>Зберегти як PDF</button>
++      <button class="diagnost-link-button" type="button" data-restart>Пройти ще раз</button>
++    </div>
++
++    <p class="diagnost-result__code">Код результату: <strong data-result-code></strong></p>
++    <p class="diagnost-disclaimer">
++      Результат сформовано лише з ваших відповідей. Документи, сайт і фактичні
++      процеси не перевірялися. Остаточна пропозиція визначається після короткої розмови.
++    </p>
++  </section>
++
++  <noscript>
++    <p class="diagnost-noscript">
++      Для інтерактивного проходження потрібен JavaScript. Діагност не передає
++      відповіді назовні й працює без реєстрації.
++    </p>
++  </noscript>
++
++  <p class="visually-hidden" aria-live="polite" data-announcer></p>
++</section>
++
++<script>
++  import { PACKAGES, QUESTIONS, evaluateDiagnost } from '../lib/diagnost-express.mjs';
++
++  const root = document.querySelector('[data-diagnost]');
++  if (root) {
++    const storageKey = 'exo-diagnost-express-v0.3';
++    const intro = root.querySelector('[data-intro]');
++    const tool = root.querySelector('[data-tool]');
++    const resultView = root.querySelector('[data-result]');
++    const startButton = root.querySelector('[data-start]');
++    const clearButton = root.querySelector('[data-clear]');
++    const backButton = root.querySelector('[data-back]');
++    const nextButton = root.querySelector('[data-next]');
++    const restartButton = root.querySelector('[data-restart]');
++    const printButton = root.querySelector('[data-print]');
++    const optionsContainer = root.querySelector('[data-options]');
++    const ownWrap = root.querySelector('[data-own-wrap]');
++    const ownInput = root.querySelector('[data-own]');
++    const error = root.querySelector('[data-error]');
++    const announcer = root.querySelector('[data-announcer]');
++    const contactEmail = root.getAttribute('data-contact-email') || '';
++
++    let currentIndex = 0;
++    let answers = {};
++    let comments = {};
++
++    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
++    const scrollToTool = (element) => element?.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
++
++    function readSaved() {
++      try {
++        const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
++        if (!saved || typeof saved !== 'object') return false;
++        answers = saved.answers && typeof saved.answers === 'object' ? saved.answers : {};
++        comments = saved.comments && typeof saved.comments === 'object' ? saved.comments : {};
++        currentIndex = Number.isInteger(saved.currentIndex) ? Math.min(Math.max(saved.currentIndex, 0), QUESTIONS.length - 1) : 0;
++        return Object.keys(answers).length > 0;
++      } catch {
++        sessionStorage.removeItem(storageKey);
++        return false;
++      }
++    }
++
++    function saveProgress() {
++      sessionStorage.setItem(storageKey, JSON.stringify({ answers, comments, currentIndex }));
++    }
++
++    function clearProgress() {
++      sessionStorage.removeItem(storageKey);
++      answers = {};
++      comments = {};
++      currentIndex = 0;
++    }
++
++    function setView(view) {
++      intro.hidden = view !== 'intro';
++      tool.hidden = view !== 'tool';
++      resultView.hidden = view !== 'result';
++    }
++
++    function renderQuestion() {
++      const question = QUESTIONS[currentIndex];
++      root.querySelector('[data-group]').textContent = question.group;
++      root.querySelector('[data-progress-label]').textContent = `Крок ${currentIndex + 1} із ${QUESTIONS.length}`;
++      root.querySelector('[data-question]').textContent = question.text;
++      root.querySelector('[data-hint]').textContent = question.hint || '';
++      root.querySelector('[data-hint]').hidden = !question.hint;
++
++      const progress = root.querySelector('[data-progress]');
++      progress.setAttribute('aria-valuemax', String(QUESTIONS.length));
++      progress.setAttribute('aria-valuenow', String(currentIndex + 1));
++      root.querySelector('[data-progress-bar]').style.width = `${((currentIndex + 1) / QUESTIONS.length) * 100}%`;
++
++      optionsContainer.replaceChildren();
++      for (const option of question.options) {
++        const label = document.createElement('label');
++        label.className = 'diagnost-option';
++
++        const input = document.createElement('input');
++        input.type = 'radio';
++        input.name = question.id;
++        input.value = option.value;
++        input.checked = answers[question.id] === option.value;
++
++        const marker = document.createElement('span');
++        marker.className = 'diagnost-option__marker';
++        marker.setAttribute('aria-hidden', 'true');
++
++        const text = document.createElement('span');
++        text.className = 'diagnost-option__text';
++        text.textContent = option.label;
++
++        input.addEventListener('change', () => {
++          answers[question.id] = option.value;
++          error.hidden = true;
++          renderOwnAnswer(question);
++          saveProgress();
++        });
++
++        label.append(input, marker, text);
++        optionsContainer.append(label);
++      }
++
++      renderOwnAnswer(question);
++      backButton.disabled = currentIndex === 0;
++      nextButton.textContent = currentIndex === QUESTIONS.length - 1 ? 'Побачити результат' : 'Далі';
++      error.hidden = true;
++      announcer.textContent = `Крок ${currentIndex + 1}. ${question.text}`;
++      requestAnimationFrame(() => root.querySelector('[data-question]')?.focus?.());
++    }
++
++    function renderOwnAnswer(question) {
++      const isOther = answers[question.id] === 'other';
++      ownWrap.hidden = !isOther;
++      ownInput.value = comments[question.id] || '';
++      ownInput.oninput = () => {
++        comments[question.id] = ownInput.value.slice(0, 500);
++        saveProgress();
++      };
++    }
++
++    function start() {
++      setView('tool');
++      renderQuestion();
++      scrollToTool(tool);
++    }
++
++    function renderResult() {
++      const result = evaluateDiagnost(answers);
++      setView('result');
++      sessionStorage.removeItem(storageKey);
++
++      root.querySelector('[data-result-title]').textContent = result.title;
++      root.querySelector('[data-result-summary]').textContent = result.summary;
++      root.querySelector('[data-first-step-title]').textContent = 'Що робити зараз';
++      root.querySelector('[data-first-step]').textContent = result.firstStep;
++      root.querySelector('[data-pilot-title]').textContent = result.pilot.label;
++      root.querySelector('[data-pilot]').textContent = result.pilot.pilot;
++      root.querySelector('[data-metric]').textContent = result.pilot.metric;
++      root.querySelector('[data-result-code]').textContent = result.resultCode;
++
++      const indicators = root.querySelector('[data-indicators]');
++      indicators.replaceChildren();
++      for (const item of result.indicators) {
++        const row = document.createElement('div');
++        row.className = `diagnost-indicator diagnost-indicator--${item.tone}`;
++        const width = item.tone === 'unknown' ? 0 : Math.max(10, (item.value / 4) * 100);
++        row.innerHTML = `
++          <div class="diagnost-indicator__copy"><span>${item.axis}</span><strong>${item.label}</strong></div>
++          <div class="diagnost-indicator__track" aria-hidden="true"><span style="width:${width}%"></span></div>
++        `;
++        indicators.append(row);
++      }
++
++      root.querySelector('[data-evidence]').textContent = result.evidence.unknown
++        ? `Підстава: ${result.evidence.known} із ${result.evidence.total} змістовних відповідей; ${result.evidence.unknown} потребують уточнення.`
++        : `Підстава: усі ${result.evidence.total} змістовних питань мають визначені відповіді.`;
++
++      const signals = root.querySelector('[data-signals]');
++      signals.replaceChildren();
++      for (const signal of result.signals) {
++        const item = document.createElement('li');
++        item.textContent = signal;
++        signals.append(item);
++      }
++
++      const packages = root.querySelector('[data-packages]');
++      packages.replaceChildren();
++      for (const item of PACKAGES) {
++        const article = document.createElement('article');
++        article.className = 'diagnost-package';
++        if (item.id === result.recommendedPackage) {
++          article.classList.add('diagnost-package--recommended');
++          article.setAttribute('aria-label', `${item.name}. Рекомендований формат`);
++        }
++        const badge = item.id === result.recommendedPackage ? '<span>Рекомендовано</span>' : '';
++        article.innerHTML = `${badge}<h4>${item.name}</h4><p>${item.description}</p>`;
++        packages.append(article);
++      }
++
++      const subject = encodeURIComponent(`ЕХО Діагност · ${result.resultCode}`);
++      const body = encodeURIComponent(`Добрий день! Я пройшов/ла ЕХО Діагност.\n\nКод результату: ${result.resultCode}\nРекомендований напрямок: ${result.title}\n\nХочу обговорити можливий перший крок.`);
++      const contact = root.querySelector('[data-contact]');
++      contact.href = contactEmail ? `mailto:${contactEmail}?subject=${subject}&body=${body}` : '/kontakty/';
++
++      announcer.textContent = `Діагностику завершено. ${result.title}`;
++      scrollToTool(resultView);
++    }
++
++    const hasSaved = readSaved();
++    if (hasSaved) {
++      startButton.textContent = 'Продовжити діагностику';
++      clearButton.hidden = false;
++    }
++
++    startButton.addEventListener('click', start);
++    clearButton.addEventListener('click', () => {
++      clearProgress();
++      startButton.textContent = 'Почати діагностику';
++      clearButton.hidden = true;
++    });
++
++    tool.addEventListener('submit', (event) => {
++      event.preventDefault();
++      const question = QUESTIONS[currentIndex];
++      if (!answers[question.id]) {
++        error.hidden = false;
++        optionsContainer.querySelector('input')?.focus();
++        return;
++      }
++      if (currentIndex < QUESTIONS.length - 1) {
++        currentIndex += 1;
++        saveProgress();
++        renderQuestion();
++        scrollToTool(tool);
++      } else {
++        renderResult();
++      }
++    });
++
++    backButton.addEventListener('click', () => {
++      if (currentIndex === 0) return;
++      currentIndex -= 1;
++      saveProgress();
++      renderQuestion();
++      scrollToTool(tool);
++    });
++
++    restartButton.addEventListener('click', () => {
++      clearProgress();
++      setView('intro');
++      startButton.textContent = 'Почати діагностику';
++      clearButton.hidden = true;
++      scrollToTool(intro);
++    });
++
++    printButton.addEventListener('click', () => window.print());
++  }
++</script>
+diff --git a/src/components/SiteHeader.astro b/src/components/SiteHeader.astro
+index fad2491..4378abd 100644
+--- a/src/components/SiteHeader.astro
++++ b/src/components/SiteHeader.astro
+@@ -9,8 +9,12 @@ import { Image } from 'astro:assets';
+ import logo from '../assets/logo-light.png';
+ import LangSwitch from './LangSwitch.astro';
+ 
+-interface Props { lang: 'uk' | 'en'; nav: { href: string; label: string }[] }
+-const { lang, nav } = Astro.props;
++interface Props {
++  lang: 'uk' | 'en';
++  nav: { href: string; label: string }[];
++  showLanguageSwitch?: boolean;
++}
++const { lang, nav, showLanguageSwitch = true } = Astro.props;
+ const here = Astro.url.pathname;
+ const alt = lang === 'uk' ? 'Юридичні Сили України' : 'Legal Forces of Ukraine';
+ ---
+@@ -28,5 +32,5 @@ const alt = lang === 'uk' ? 'Юридичні Сили України' : 'Legal
+     ))}
+   </nav>
+ 
+-  <LangSwitch lang={lang} />
++  {showLanguageSwitch && <LangSwitch lang={lang} />}
+ </header>
+diff --git a/src/data/uk.json b/src/data/uk.json
+index e1006c9..207fda2 100644
+--- a/src/data/uk.json
++++ b/src/data/uk.json
+@@ -15,6 +15,10 @@
+       "href": "/praktyky/",
+       "label": "ПРАКТИКИ"
+     },
++    {
++      "href": "/ai-diagnost/",
++      "label": "AI-ДІАГНОСТ"
++    },
+     {
+       "href": "/publikatsii/",
+       "label": "ПУБЛІКАЦІЇ"
+@@ -123,6 +127,10 @@
+       "title": "Напрями практики — Наталія Целовальніченко",
+       "description": "Відшкодування шкоди потерпілим внаслідок російської агресії, захист військових, AI-системи, кримінальні та цивільні справи, спори з органами влади."
+     },
++    "diagnost": {
++      "title": "ЕХО Діагност — готовність підприємства до впровадження АІ",
++      "description": "Коротка самооцінка готовності процесів, даних і команди до безпечного пілота АІ-системи. Результат без реєстрації."
++    },
+     "publications": {
+       "title": "Публікації та згадки в медіа — Наталія Целовальніченко",
+       "description": "Матеріали, коментарі та публікації про роботу адвокатки й проєкту «Юридичні Сили України»."
+diff --git a/src/layouts/BaseLayout.astro b/src/layouts/BaseLayout.astro
+index 6eb9f2f..63e681a 100644
+--- a/src/layouts/BaseLayout.astro
++++ b/src/layouts/BaseLayout.astro
+@@ -9,6 +9,7 @@
+  *   description  string
+  *   intro?       boolean = false  — вступна завіса (тільки головна)
+  *   ogImage?     string = '/og-image.png'
++ *   showLanguageSwitch? boolean = true — вимкнути для сторінок без перекладу
+  */
+ import '@fontsource/manrope/500.css';
+ import '@fontsource/manrope/600.css';
+@@ -36,8 +37,16 @@ interface Props {
+   description: string;
+   intro?: boolean;
+   ogImage?: string;
++  showLanguageSwitch?: boolean;
+ }
+-const { lang, title, description, intro = false, ogImage = '/og-image.png' } = Astro.props;
++const {
++  lang,
++  title,
++  description,
++  intro = false,
++  ogImage = '/og-image.png',
++  showLanguageSwitch = true,
++} = Astro.props;
+ const t = lang === 'uk' ? uk : en;
+ 
+ const site = Astro.site?.href.replace(/\/$/, '') ?? 'https://tselovalnichenko.law';
+@@ -66,7 +75,7 @@ const jsonLd = {
+   <title>{title}</title>
+   <meta name="description" content={description} />
+   <link rel="canonical" href={canonical} />
+-  <link rel="alternate" hreflang={lang === 'uk' ? 'en' : 'uk'} href={site + altPath} />
++  {showLanguageSwitch && <link rel="alternate" hreflang={lang === 'uk' ? 'en' : 'uk'} href={site + altPath} />}
+   <link rel="alternate" hreflang="x-default" href={site + '/'} />
+   <meta name="robots" content="index, follow" />
+   <meta name="theme-color" content="#e8ecf0" />
+@@ -96,7 +105,7 @@ const jsonLd = {
+     <DigitalRain />
+     <div class="page__vignette" aria-hidden="true"></div>
+ 
+-    <SiteHeader lang={lang} nav={t.nav} />
++    <SiteHeader lang={lang} nav={t.nav} showLanguageSwitch={showLanguageSwitch} />
+ 
+     <main id="main" class="stack">
+       <slot />
+diff --git a/src/lib/diagnost-express.mjs b/src/lib/diagnost-express.mjs
+new file mode 100644
+index 0000000..deba1fe
+--- /dev/null
++++ b/src/lib/diagnost-express.mjs
+@@ -0,0 +1,384 @@
++export const SCORING_VERSION = '0.3.0-express';
++
++export const QUESTIONS = [
++  {
++    id: 'goal',
++    group: 'Контекст',
++    text: 'Яку зміну ви хочете отримати першою?',
++    hint: 'Оберіть найближчу мету. Вона визначить приклад першого пілота.',
++    options: [
++      ['save_time', 'Зменшити ручну роботу й навантаження команди'],
++      ['decisions', 'Швидше отримувати дані для управлінських рішень'],
++      ['clients', 'Поліпшити роботу зі зверненнями клієнтів'],
++      ['risks', 'Зменшити правові, договірні або операційні ризики'],
++      ['growth', 'Системно бачити ринки, конкурентів і нові можливості'],
++      ['unknown', 'Потрібна допомога у виборі'],
++      ['other', 'Інша мета'],
++    ],
++  },
++  {
++    id: 'sector',
++    group: 'Контекст',
++    text: 'У якій сфері працює організація?',
++    hint: 'Сфера уточнює приклади, але не додає балів готовності.',
++    options: [
++      ['professional', 'Професійні послуги'],
++      ['trade', 'Торгівля та електронна комерція'],
++      ['production', 'Виробництво, агро або логістика'],
++      ['service', 'Сервіс, гостинність або робота з населенням'],
++      ['nonprofit', 'Благодійна чи громадська організація'],
++      ['omc', 'Орган місцевого самоврядування або комунальна установа'],
++      ['other', 'Інша сфера'],
++    ],
++  },
++  {
++    id: 'team_size',
++    group: 'Контекст',
++    text: 'Скільки людей працює в організації?',
++    hint: 'Розмір впливає на масштаб рішення, але не визначає зрілість.',
++    options: [
++      ['micro', '1-9'],
++      ['small', '10-49'],
++      ['medium', '50-249'],
++      ['large', '250 і більше'],
++      ['unknown', 'Складно визначити'],
++    ],
++  },
++  {
++    id: 'repeated_work',
++    group: 'Потенціал',
++    text: 'Як часто команда виконує повторювану роботу з великим обсягом інформації?',
++    hint: 'Наприклад: документи, звернення, звіти, перевірки, перенесення даних.',
++    score: 'opportunity',
++    options: [
++      ['daily_heavy', 'Щодня, це забирає значну частину робочого часу', 4],
++      ['daily', 'Щодня, але навантаження помірне', 3.5],
++      ['weekly', 'Кілька разів на тиждень або щотижня', 3],
++      ['occasional', 'Час від часу', 1.5],
++      ['none', 'Сталого повторюваного процесу не бачимо', 0.5],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інша ситуація', null],
++    ],
++  },
++  {
++    id: 'process_cost',
++    group: 'Потенціал',
++    text: 'Що найбільше заважає цьому процесу зараз?',
++    hint: 'Оберіть головну проблему, навіть якщо їх декілька.',
++    score: 'opportunity',
++    options: [
++      ['hours', 'Забирає забагато людино-годин', 4],
++      ['bottleneck', 'Створює черги або затримує інші рішення', 4],
++      ['errors', 'Помилки й повторні перевірки', 3.8],
++      ['key_person', 'Критично залежить від однієї людини', 3.4],
++      ['lost_opportunity', 'Через повільність втрачаємо клієнтів або можливості', 3.6],
++      ['controlled', 'Процес передбачуваний і не створює помітних втрат', 1],
++      ['unknown', 'Не вимірювали', null],
++      ['other', 'Інша проблема', null],
++    ],
++  },
++  {
++    id: 'process_data',
++    group: 'Готовність',
++    text: 'У якому вигляді доступна основна інформація для цього процесу?',
++    score: 'readiness',
++    options: [
++      ['paper', 'Переважно папір або усні відомості', 0],
++      ['scans', 'Скани, фото чи PDF без структури', 1],
++      ['files', 'Файли й таблиці, джерела та версії розрізнені', 2],
++      ['managed', 'Актуальні записи в системі з визначеними доступами', 3.2],
++      ['connected', 'Системи обмінюються даними, якість обміну перевіряється', 4],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший стан даних', null],
++    ],
++  },
++  {
++    id: 'task_tools',
++    group: 'Готовність',
++    text: 'Де команда веде завдання й фіксує їх виконання?',
++    score: 'readiness',
++    options: [
++      ['verbal_paper', 'Усно або на папері', 0],
++      ['messages', 'У листуванні та месенджерах', 1],
++      ['tables', 'У таблицях', 2],
++      ['system', 'У спеціалізованій системі', 3.2],
++      ['integrated', 'У пов’язаних системах із єдиними правилами', 4],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший спосіб', null],
++    ],
++  },
++  {
++    id: 'process_visibility',
++    group: 'Готовність',
++    text: 'Наскільки зрозуміло, як процес працює від початку до результату?',
++    score: 'readiness',
++    options: [
++      ['not_documented', 'Кожен працює по-своєму, спільної картини немає', 0],
++      ['partial', 'Основні кроки відомі, але багато залежить від людей', 1.2],
++      ['understood', 'Кроки й відповідальні зрозумілі команді', 2.3],
++      ['documented', 'Процес описаний, правила й винятки зафіксовані', 3.2],
++      ['measured', 'Процес описаний і регулярно вимірюється', 4],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший стан', null],
++    ],
++  },
++  {
++    id: 'knowledge_access',
++    group: 'Готовність',
++    text: 'Як команда знаходить потрібні правила, документи й попередні рішення?',
++    score: 'readiness',
++    options: [
++      ['people', 'Запитує конкретних досвідчених людей', 0],
++      ['scattered', 'Шукає у листуванні, на дисках і в різних папках', 1],
++      ['folders', 'Є спільні папки, але актуальність треба перевіряти вручну', 2],
++      ['shared_base', 'Є спільна база з відповідальними за оновлення', 3.2],
++      ['curated', 'Є перевірена база знань, версії та правила доступу', 4],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший спосіб', null],
++    ],
++  },
++  {
++    id: 'external_cycle',
++    group: 'Готовність',
++    text: 'Як організація відстежує зміни ринку, конкурентів, права й нові можливості?',
++    score: 'readiness',
++    options: [
++      ['none', 'Системного збору немає', 0],
++      ['occasional', 'Дізнаємося ситуативно, коли виникає потреба', 1],
++      ['manual', 'Періодично збираємо вручну з кількох джерел', 2],
++      ['assigned', 'Є відповідальні, джерела й регулярний огляд', 3.2],
++      ['systematic', 'Дані збираються, зіставляються й впливають на рішення', 4],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший підхід', null],
++    ],
++  },
++  {
++    id: 'governance',
++    group: 'Безпечний пілот',
++    text: 'Як визначені правила роботи з персональними, конфіденційними та службовими даними?',
++    score: 'cooperation',
++    options: [
++      ['unknown_rules', 'Правила й межі доступу не визначені', 0],
++      ['informal', 'Є усні домовленості або звичні практики', 1],
++      ['partial', 'Для частини даних правила зафіксовані', 2],
++      ['defined', 'Категорії даних, доступи й відповідальні визначені', 3.2],
++      ['audited', 'Правила діють, перевіряються й оновлюються', 4],
++      ['no_sensitive', 'У першому процесі чутливі дані не використовуються', 3],
++      ['unknown', 'Не знаю', null],
++      ['other', 'Інший режим', null],
++    ],
++  },
++  {
++    id: 'change_capacity',
++    group: 'Безпечний пілот',
++    text: 'Що організація реально може виділити для першого пілота?',
++    score: 'cooperation',
++    options: [
++      ['no_owner', 'Поки немає відповідальної людини', 0],
++      ['interest_only', 'Є інтерес, але ресурс ще не визначали', 1],
++      ['owner_no_time', 'Є відповідальний, але час і дані треба підготувати', 2],
++      ['pilot_ready', 'Є відповідальний, обмежений процес і час на перевірку', 3.2],
++      ['resources_ready', 'Є команда, дані, бюджет і критерій успіху', 4],
++      ['unknown', 'Потрібно обговорити', null],
++      ['other', 'Інша готовність', null],
++    ],
++  },
++].map((question) => ({
++  ...question,
++  options: question.options.map(([value, label, points]) => ({ value, label, points })),
++}));
++
++const SCORE_QUESTIONS = QUESTIONS.filter((question) => question.score);
++const BY_ID = new Map(QUESTIONS.map((question) => [question.id, question]));
++
++const GOAL_PILOTS = {
++  save_time: {
++    label: 'Керований повторюваний процес',
++    pilot: 'Обрати один масовий процес і перевірити, де АІ безпечно готує чернетку, переносить дані або знаходить потрібне.',
++    metric: 'Людино-години, тривалість циклу, частка повторної роботи та вартість перевірки.',
++  },
++  decisions: {
++    label: 'Управлінська аналітика',
++    pilot: 'Зібрати один регулярний управлінський звіт із визначених джерел і залишити рішення за відповідальною людиною.',
++    metric: 'Час підготовки, повнота джерел, кількість ручних звірок і час до рішення.',
++  },
++  clients: {
++    label: 'Перевірені відповіді на звернення',
++    pilot: 'Підготувати контур, який класифікує звернення й формує чернетки лише з погодженої бази відповідей.',
++    metric: 'Час першої відповіді, точність маршрутизації, частка правок і невідповіданих питань.',
++  },
++  risks: {
++    label: 'Правила, документи й контроль ризику',
++    pilot: 'Вибрати один тип документа або події та перевірити автоматичне виявлення відхилень із обов’язковою людською валідацією.',
++    metric: 'Час перевірки, знайдені відхилення, хибні спрацювання та частка рішень із людським підтвердженням.',
++  },
++  growth: {
++    label: 'Проактивна зовнішня розвідка',
++    pilot: 'Налаштувати регулярний огляд погоджених джерел і короткий дайджест змін, що потребують рішення керівника.',
++    metric: 'Час збору, релевантність сигналів, пропущені зміни й кількість рішень на основі огляду.',
++  },
++  unknown: {
++    label: 'Карта можливостей',
++    pilot: 'Порівняти 2-3 повторювані процеси й обрати той, де цінність можна виміряти без перебудови всієї організації.',
++    metric: 'Базовий час, частота, вартість помилок, доступність даних і складність перевірки.',
++  },
++  other: {
++    label: 'Уточнення задачі',
++    pilot: 'Перекласти вашу мету на один процес, один вимірюваний результат і безпечні межі дій системи.',
++    metric: 'Погоджені вихідний стан, бажана зміна, строк перевірки й критерій зупинки.',
++  },
++};
++
++const ROUTES = {
++  discovery: {
++    title: 'Почати з карти можливостей',
++    summary: 'Даних достатньо, щоб побачити напрямок, але недостатньо для чесної рекомендації конкретного пілота.',
++    firstStep: 'Коротко порівняти 2-3 процеси та виміряти їхню частоту, вартість і доступність даних.',
++    recommendedPackage: 'focus',
++  },
++  foundation: {
++    title: 'Спочатку підготувати основу',
++    summary: 'Потенціал є, але запуск АІ зараз упиратиметься в дані, правила або суперечливий опис процесу.',
++    firstStep: 'Описати один процес, визначити джерела даних, відповідального та межі доступу. Потім запускати обмежений пілот.',
++    recommendedPackage: 'focus',
++  },
++  focus: {
++    title: 'Готовність до фокусного пілота',
++    summary: 'Є практична задача й достатня основа, щоб перевірити користь на одному процесі без великої перебудови.',
++    firstStep: 'Зафіксувати вихідні показники та провести короткий пілот із людською перевіркою кожного значущого результату.',
++    recommendedPackage: 'focus',
++  },
++  connected: {
++    title: 'Можна будувати пов’язаний контур',
++    summary: 'Організація має достатньо даних і відповідальності, щоб після першого пілота з’єднати кілька суміжних процесів.',
++    firstStep: 'Почати з одного процесу, а контракт даних і критерії успіху одразу спроєктувати для наступного суміжного контуру.',
++    recommendedPackage: 'connected',
++  },
++  systemic: {
++    title: 'Є передумови для системного ЕХО',
++    summary: 'Процеси, дані й відповідальність достатньо зрілі для поетапної системи, а не окремого AI-інструмента.',
++    firstStep: 'Побудувати дорожню карту: перший вимірюваний пілот, спільна база знань, аналітика та правовий контур.',
++    recommendedPackage: 'systemic',
++  },
++};
++
++export const PACKAGES = [
++  {
++    id: 'focus',
++    name: 'Фокусна',
++    description: 'Один процес, підготовка, короткий пілот і вимірювання ефекту.',
++  },
++  {
++    id: 'connected',
++    name: 'Пов’язана',
++    description: 'Кілька суміжних процесів, узгоджені дані й відповідальні.',
++  },
++  {
++    id: 'systemic',
++    name: 'Системна',
++    description: 'Поетапний ЕХО: база знань, аналітика, автоматизація та правовий супровід.',
++  },
++];
++
++function optionFor(questionId, value) {
++  return BY_ID.get(questionId)?.options.find((option) => option.value === value);
++}
++
++function average(values) {
++  const known = values.filter((value) => Number.isFinite(value));
++  return known.length ? known.reduce((sum, value) => sum + value, 0) / known.length : null;
++}
++
++function indicator(score, axis) {
++  if (score === null) {
++    return { axis, label: 'Недостатньо даних', tone: 'unknown', value: 0 };
++  }
++  if (score >= 3.1) return { axis, label: 'Сильна основа', tone: 'strong', value: score };
++  if (score >= 1.75) return { axis, label: 'Часткова готовність', tone: 'medium', value: score };
++  return { axis, label: 'Потрібна підготовка', tone: 'prepare', value: score };
++}
++
++export function evaluateDiagnost(answers = {}) {
++  const scoreValues = { opportunity: [], readiness: [], cooperation: [] };
++  let unknownCount = 0;
++  let otherCount = 0;
++
++  for (const question of SCORE_QUESTIONS) {
++    const value = answers[question.id];
++    const option = optionFor(question.id, value);
++    if (!option || option.points === null || option.points === undefined) {
++      unknownCount += 1;
++      if (value === 'other') otherCount += 1;
++      continue;
++    }
++    scoreValues[question.score].push(option.points);
++  }
++
++  const scores = {
++    opportunity: average(scoreValues.opportunity),
++    readiness: average(scoreValues.readiness),
++    cooperation: average(scoreValues.cooperation),
++  };
++
++  const contradictions = [];
++  if (['managed', 'connected'].includes(answers.process_data) && answers.task_tools === 'verbal_paper') {
++    contradictions.push('Дані описані як системні, але щоденна робота фіксується усно або на папері. Це потрібно уточнити до пілота.');
++  }
++  if (answers.process_visibility === 'measured' && ['verbal_paper', 'messages'].includes(answers.task_tools)) {
++    contradictions.push('Процес названо вимірюваним, але спосіб фіксації завдань не дає надійного джерела для цих вимірювань.');
++  }
++
++  const evidenceKnown = SCORE_QUESTIONS.length - unknownCount;
++  const evidenceRatio = evidenceKnown / SCORE_QUESTIONS.length;
++  let route = 'focus';
++
++  if (evidenceRatio < 0.67) {
++    route = 'discovery';
++  } else if (contradictions.length > 0 || (scores.readiness ?? 0) < 1.75 || (scores.cooperation ?? 0) < 1.4) {
++    route = 'foundation';
++  } else if ((scores.opportunity ?? 0) < 1.6) {
++    route = 'discovery';
++  } else if ((scores.readiness ?? 0) >= 3.45 && (scores.cooperation ?? 0) >= 3.35 && (scores.opportunity ?? 0) >= 3.2) {
++    route = 'systemic';
++  } else if ((scores.readiness ?? 0) >= 2.65 && (scores.cooperation ?? 0) >= 2.4) {
++    route = 'connected';
++  }
++
++  const routeInfo = ROUTES[route];
++  const goalPilot = GOAL_PILOTS[answers.goal] ?? GOAL_PILOTS.unknown;
++  const signals = [];
++
++  if ((scores.opportunity ?? 0) >= 3) signals.push('Є повторюваний процес із помітною вартістю часу, помилок або затримок.');
++  if ((scores.readiness ?? 0) >= 3) signals.push('Дані й робочі правила вже дозволяють перевіряти АІ на обмеженому контурі.');
++  if ((scores.cooperation ?? 0) >= 3) signals.push('Є передумови для відповідального пілота з визначеними доступами й відповідальними.');
++  if ((scores.readiness ?? 4) < 1.75) signals.push('Першу користь дасть упорядкування процесу й даних, а не складна автоматизація.');
++  if ((scores.cooperation ?? 4) < 1.75) signals.push('До пілота потрібно визначити відповідального, межі даних і спосіб перевірки результатів.');
++  if (otherCount > 0) signals.push('Власні відповіді варто розібрати на короткій консультації, бо вони не зводяться до типового сценарію.');
++  signals.push(...contradictions);
++
++  return {
++    scoringVersion: SCORING_VERSION,
++    methodologyStatus: 'PRELIMINARY_SELF_ASSESSMENT',
++    route,
++    resultCode: `EXO-${route.toUpperCase()}-${SCORING_VERSION}`,
++    title: routeInfo.title,
++    summary: routeInfo.summary,
++    firstStep: routeInfo.firstStep,
++    pilot: goalPilot,
++    recommendedPackage: routeInfo.recommendedPackage,
++    scores,
++    indicators: [
++      indicator(scores.opportunity, 'Потенціал користі'),
++      indicator(scores.readiness, 'Готовність процесів і даних'),
++      indicator(scores.cooperation, 'Готовність до безпечного пілота'),
++    ],
++    evidence: {
++      known: evidenceKnown,
++      total: SCORE_QUESTIONS.length,
++      percent: Math.round(evidenceRatio * 100),
++      unknown: unknownCount,
++    },
++    contradictions,
++    signals,
++  };
++}
+diff --git a/src/pages/ai-diagnost.astro b/src/pages/ai-diagnost.astro
+new file mode 100644
+index 0000000..69bc509
+--- /dev/null
++++ b/src/pages/ai-diagnost.astro
+@@ -0,0 +1,17 @@
++---
++import BaseLayout from '../layouts/BaseLayout.astro';
++import ContactBand from '../components/ContactBand.astro';
++import ExoDiagnost from '../components/ExoDiagnost.astro';
++import '../styles/diagnost.css';
++import t from '../data/uk.json';
++---
++
++<BaseLayout
++  lang="uk"
++  title={t.meta.diagnost.title}
++  description={t.meta.diagnost.description}
++  showLanguageSwitch={false}
++>
++  <ExoDiagnost contactEmail={t.contacts.mail} />
++  <ContactBand slot="band" contacts={t.contacts} />
++</BaseLayout>
+diff --git a/src/styles/diagnost.css b/src/styles/diagnost.css
+new file mode 100644
+index 0000000..5ca90cd
+--- /dev/null
++++ b/src/styles/diagnost.css
+@@ -0,0 +1,583 @@
++.diagnost {
++  --diagnost-border: rgba(45, 57, 68, 0.3);
++  --diagnost-surface: rgba(252, 253, 254, 0.94);
++  --diagnost-teal: #185f68;
++  --diagnost-green: #2d6753;
++  --diagnost-amber: #8a5b13;
++  position: relative;
++  max-width: 1120px;
++  margin: 56px auto 0;
++}
++
++.diagnost [hidden] { display: none !important; }
++
++.diagnost-hero {
++  max-width: 860px;
++  margin: 0 auto;
++  text-align: center;
++}
++
++.diagnost-hero__kicker,
++.diagnost-eyebrow {
++  font-family: var(--f-mono);
++  font-size: 0.875rem;
++  font-weight: 500;
++  line-height: 1.45;
++  letter-spacing: 0.12em;
++  color: var(--c-accent);
++}
++
++.diagnost-hero__title {
++  margin-top: 8px;
++  font-family: var(--f-serif);
++  font-size: 4rem;
++  line-height: 1.05;
++  color: var(--c-text-strong);
++}
++
++.diagnost-hero__lede {
++  max-width: 760px;
++  margin: 20px auto 0;
++  font-size: 1.25rem;
++  line-height: 1.6;
++  color: var(--c-text);
++}
++
++.diagnost-trust {
++  display: flex;
++  flex-wrap: wrap;
++  justify-content: center;
++  gap: 0;
++  max-width: 880px;
++  margin: 30px auto 0;
++  border-top: 1px solid var(--diagnost-border);
++  border-bottom: 1px solid var(--diagnost-border);
++}
++
++.diagnost-trust span {
++  position: relative;
++  padding: 12px 24px;
++  font-size: 1rem;
++  font-weight: 600;
++  color: var(--c-text-muted);
++}
++
++.diagnost-trust span + span::before {
++  content: '';
++  position: absolute;
++  left: 0;
++  top: 25%;
++  bottom: 25%;
++  width: 1px;
++  background: var(--diagnost-border);
++}
++
++.diagnost-intro,
++.diagnost-tool,
++.diagnost-result {
++  max-width: 920px;
++  margin: 40px auto 0;
++  padding: 44px;
++  background: var(--diagnost-surface);
++  border: 1px solid var(--diagnost-border);
++  box-shadow: 0 18px 52px rgba(43, 55, 66, 0.13);
++}
++
++.diagnost-intro {
++  display: grid;
++  grid-template-columns: minmax(0, 1fr) auto;
++  gap: 48px;
++  align-items: end;
++}
++
++.diagnost-intro h2,
++.diagnost-result__header h2 {
++  margin-top: 8px;
++  font-family: var(--f-serif);
++  font-size: 2.3rem;
++  line-height: 1.15;
++  color: var(--c-text-strong);
++}
++
++.diagnost-intro p:not(.diagnost-eyebrow),
++.diagnost-result__header > p:last-child {
++  margin-top: 14px;
++  max-width: 680px;
++  font-size: 1.075rem;
++  line-height: 1.65;
++}
++
++.diagnost-intro__actions,
++.diagnost-result__actions {
++  display: flex;
++  flex-direction: column;
++  align-items: stretch;
++  gap: 12px;
++}
++
++.diagnost-button {
++  min-height: 52px;
++  padding: 13px 22px;
++  border: 1px solid transparent;
++  border-radius: 4px;
++  font-family: var(--f-sans);
++  font-size: 1rem;
++  font-weight: 700;
++  line-height: 1.35;
++  text-align: center;
++  cursor: pointer;
++  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
++}
++
++.diagnost-button:hover { transform: translateY(-1px); }
++.diagnost-button:active { transform: translateY(0); }
++.diagnost-button:disabled { cursor: not-allowed; opacity: 0.45; transform: none; }
++
++.diagnost-button--primary {
++  color: #fff;
++  background: var(--c-accent);
++  border-color: var(--c-accent);
++}
++
++.diagnost-button--primary:hover { background: #a91d2d; border-color: #a91d2d; color: #fff; }
++
++.diagnost-button--secondary {
++  color: var(--c-text-strong);
++  background: transparent;
++  border-color: rgba(45, 57, 68, 0.5);
++}
++
++.diagnost-button--secondary:hover { background: #fff; border-color: var(--c-text-strong); }
++
++.diagnost-link-button {
++  min-height: 44px;
++  padding: 8px 4px;
++  border: 0;
++  border-bottom: 1px solid currentColor;
++  color: var(--c-text-muted);
++  background: transparent;
++  font-size: 0.95rem;
++  cursor: pointer;
++}
++
++.diagnost-link-button:hover { color: var(--c-accent); }
++
++.diagnost-progress__meta {
++  display: flex;
++  justify-content: space-between;
++  gap: 20px;
++  font-family: var(--f-mono);
++  font-size: 0.9rem;
++  line-height: 1.4;
++  color: var(--c-text-muted);
++}
++
++.diagnost-progress__meta span:first-child { color: var(--diagnost-teal); }
++
++.diagnost-progress__track {
++  height: 6px;
++  margin-top: 12px;
++  overflow: hidden;
++  background: #d4dbe1;
++}
++
++.diagnost-progress__track span {
++  display: block;
++  height: 100%;
++  background: linear-gradient(90deg, var(--diagnost-teal), var(--c-accent));
++  transition: width 260ms ease;
++}
++
++.diagnost-question {
++  min-width: 0;
++  margin: 36px 0 0;
++  padding: 0;
++  border: 0;
++}
++
++.diagnost-question__title {
++  width: 100%;
++  padding: 0;
++  font-family: var(--f-serif);
++  font-size: 2rem;
++  font-weight: 700;
++  line-height: 1.25;
++  color: var(--c-text-strong);
++}
++
++.diagnost-question__hint {
++  margin-top: 10px;
++  font-size: 1rem;
++  line-height: 1.55;
++  color: var(--c-text-muted);
++}
++
++.diagnost-options {
++  display: grid;
++  gap: 10px;
++  margin-top: 26px;
++}
++
++.diagnost-option {
++  position: relative;
++  display: grid;
++  grid-template-columns: 24px minmax(0, 1fr);
++  gap: 14px;
++  align-items: center;
++  min-height: 56px;
++  padding: 12px 16px;
++  border: 1px solid var(--diagnost-border);
++  background: rgba(255, 255, 255, 0.62);
++  cursor: pointer;
++  transition: border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease;
++}
++
++.diagnost-option:hover {
++  border-color: rgba(24, 95, 104, 0.75);
++  background: #fff;
++}
++
++.diagnost-option:has(input:checked) {
++  border-color: var(--diagnost-teal);
++  background: rgba(220, 238, 239, 0.65);
++  box-shadow: inset 4px 0 0 var(--diagnost-teal);
++}
++
++.diagnost-option:has(input:focus-visible) {
++  outline: 3px solid var(--c-focus);
++  outline-offset: 3px;
++}
++
++.diagnost-option input {
++  position: absolute;
++  width: 1px;
++  height: 1px;
++  opacity: 0;
++}
++
++.diagnost-option__marker {
++  width: 20px;
++  height: 20px;
++  border: 2px solid #65717b;
++  border-radius: 50%;
++  background: #fff;
++  box-shadow: inset 0 0 0 4px #fff;
++}
++
++.diagnost-option input:checked + .diagnost-option__marker {
++  border-color: var(--diagnost-teal);
++  background: var(--diagnost-teal);
++}
++
++.diagnost-option__text {
++  font-size: 1.05rem;
++  font-weight: 600;
++  line-height: 1.45;
++  color: var(--c-text-strong);
++}
++
++.diagnost-own {
++  display: grid;
++  gap: 8px;
++  margin-top: 18px;
++  font-size: 1rem;
++  font-weight: 600;
++}
++
++.diagnost-own textarea {
++  width: 100%;
++  min-height: 104px;
++  resize: vertical;
++  padding: 13px 15px;
++  border: 1px solid var(--diagnost-border);
++  border-radius: 2px;
++  background: #fff;
++  color: var(--c-text);
++  font: inherit;
++  line-height: 1.55;
++}
++
++.diagnost-own textarea:focus-visible {
++  outline: 3px solid var(--c-focus);
++  outline-offset: 3px;
++}
++
++.diagnost-error {
++  margin-top: 16px;
++  color: #8d1725;
++  font-size: 1rem;
++  font-weight: 700;
++}
++
++.diagnost-navigation {
++  display: flex;
++  justify-content: space-between;
++  gap: 16px;
++  margin-top: 34px;
++  padding-top: 24px;
++  border-top: 1px solid var(--diagnost-border);
++}
++
++.diagnost-navigation .diagnost-button { min-width: 148px; }
++
++.diagnost-result__header {
++  max-width: 760px;
++}
++
++.diagnost-indicators {
++  display: grid;
++  gap: 18px;
++  margin-top: 34px;
++  padding: 26px 0;
++  border-top: 1px solid var(--diagnost-border);
++  border-bottom: 1px solid var(--diagnost-border);
++}
++
++.diagnost-indicator {
++  display: grid;
++  grid-template-columns: minmax(220px, 0.9fr) minmax(240px, 1.1fr);
++  align-items: center;
++  gap: 24px;
++}
++
++.diagnost-indicator__copy {
++  display: flex;
++  justify-content: space-between;
++  gap: 16px;
++}
++
++.diagnost-indicator__copy span,
++.diagnost-indicator__copy strong {
++  font-size: 1rem;
++  line-height: 1.4;
++}
++
++.diagnost-indicator__copy strong { text-align: right; }
++
++.diagnost-indicator__track {
++  height: 8px;
++  overflow: hidden;
++  background: #d5dce2;
++}
++
++.diagnost-indicator__track span { display: block; height: 100%; background: var(--diagnost-amber); }
++.diagnost-indicator--strong .diagnost-indicator__track span { background: var(--diagnost-green); }
++.diagnost-indicator--medium .diagnost-indicator__track span { background: var(--diagnost-teal); }
++.diagnost-indicator--unknown .diagnost-indicator__track { background: repeating-linear-gradient(90deg, #d5dce2 0 12px, transparent 12px 18px); }
++
++.diagnost-evidence {
++  margin-top: 12px;
++  font-size: 0.95rem;
++  line-height: 1.5;
++  color: var(--c-text-muted);
++}
++
++.diagnost-route {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 44px;
++  margin-top: 38px;
++}
++
++.diagnost-route > div {
++  padding-top: 18px;
++  border-top: 3px solid var(--diagnost-teal);
++}
++
++.diagnost-route > div:last-child { border-color: var(--c-accent); }
++
++.diagnost-route h3,
++.diagnost-signals h3,
++.diagnost-packages h3 {
++  margin-top: 8px;
++  font-family: var(--f-serif);
++  font-size: 1.55rem;
++  line-height: 1.25;
++  color: var(--c-text-strong);
++}
++
++.diagnost-route p:not(.diagnost-eyebrow),
++.diagnost-signals li,
++.diagnost-package p {
++  margin-top: 10px;
++  font-size: 1rem;
++  line-height: 1.6;
++}
++
++.diagnost-metric { color: var(--c-text-muted); }
++.diagnost-metric strong { color: var(--c-text-strong); }
++
++.diagnost-signals {
++  margin-top: 38px;
++  padding: 28px 0;
++  border-top: 1px solid var(--diagnost-border);
++  border-bottom: 1px solid var(--diagnost-border);
++}
++
++.diagnost-signals ul {
++  display: grid;
++  gap: 12px;
++  margin: 18px 0 0;
++  padding: 0;
++  list-style: none;
++}
++
++.diagnost-signals li {
++  position: relative;
++  margin-top: 0;
++  padding-left: 22px;
++}
++
++.diagnost-signals li::before {
++  content: '';
++  position: absolute;
++  left: 0;
++  top: 0.7em;
++  width: 9px;
++  height: 2px;
++  background: var(--c-accent);
++}
++
++.diagnost-packages { margin-top: 38px; }
++
++.diagnost-packages__list {
++  display: grid;
++  grid-template-columns: repeat(3, minmax(0, 1fr));
++  gap: 16px;
++  margin-top: 22px;
++}
++
++.diagnost-package {
++  position: relative;
++  min-height: 188px;
++  padding: 22px;
++  border: 1px solid var(--diagnost-border);
++  background: rgba(255, 255, 255, 0.56);
++}
++
++.diagnost-package--recommended {
++  border: 2px solid var(--c-accent);
++  background: #fff;
++}
++
++.diagnost-package > span {
++  display: inline-block;
++  margin-bottom: 16px;
++  padding: 4px 8px;
++  border: 1px solid var(--c-accent);
++  color: var(--c-accent);
++  font-family: var(--f-mono);
++  font-size: 0.78rem;
++  font-weight: 600;
++  line-height: 1.3;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++}
++
++.diagnost-package h4 {
++  margin: 0;
++  font-family: var(--f-serif);
++  font-size: 1.45rem;
++  line-height: 1.2;
++}
++
++.diagnost-result__actions {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  margin-top: 38px;
++}
++
++.diagnost-result__actions .diagnost-link-button { grid-column: 1 / -1; justify-self: center; }
++
++.diagnost-result__code,
++.diagnost-disclaimer {
++  margin-top: 18px;
++  font-size: 0.95rem;
++  line-height: 1.55;
++  color: var(--c-text-muted);
++}
++
++.diagnost-result__code strong {
++  color: var(--c-text-strong);
++  font-family: var(--f-mono);
++}
++
++.diagnost-disclaimer {
++  padding-top: 18px;
++  border-top: 1px solid var(--diagnost-border);
++}
++
++.diagnost-noscript {
++  max-width: 920px;
++  margin: 24px auto 0;
++  padding: 16px 18px;
++  border-left: 4px solid var(--c-accent);
++  background: #fff;
++  font-size: 1rem;
++}
++
++@media (max-width: 820px) {
++  .diagnost { margin-top: 40px; }
++  .diagnost-hero__title { font-size: 3.1rem; }
++  .diagnost-hero__lede { font-size: 1.1rem; }
++  .diagnost-intro,
++  .diagnost-tool,
++  .diagnost-result { padding: 30px; }
++  .diagnost-intro { grid-template-columns: 1fr; gap: 26px; }
++  .diagnost-intro__actions { align-items: start; }
++  .diagnost-route { grid-template-columns: 1fr; gap: 28px; }
++  .diagnost-packages__list { grid-template-columns: 1fr; }
++  .diagnost-package { min-height: 0; }
++  .diagnost-indicator { grid-template-columns: 1fr; gap: 9px; }
++}
++
++@media (max-width: 560px) {
++  .diagnost { margin-top: 28px; }
++  .diagnost-hero { text-align: left; }
++  .diagnost-hero__title { font-size: 2.65rem; }
++  .diagnost-hero__lede { font-size: 1.05rem; }
++  .diagnost-trust { justify-content: flex-start; margin-top: 24px; }
++  .diagnost-trust span { width: 100%; padding: 10px 0; }
++  .diagnost-trust span + span::before { top: 0; right: 0; bottom: auto; width: 100%; height: 1px; }
++  .diagnost-intro,
++  .diagnost-tool,
++  .diagnost-result { margin-top: 28px; padding: 22px 18px; }
++  .diagnost-intro h2,
++  .diagnost-result__header h2 { font-size: 1.9rem; }
++  .diagnost-question__title { font-size: 1.65rem; }
++  .diagnost-option { min-height: 60px; padding: 12px; }
++  .diagnost-option__text { font-size: 1rem; }
++  .diagnost-navigation { display: grid; grid-template-columns: 1fr 1.25fr; }
++  .diagnost-navigation .diagnost-button { min-width: 0; padding-inline: 12px; }
++  .diagnost-indicator__copy { display: grid; gap: 2px; }
++  .diagnost-indicator__copy strong { text-align: left; }
++  .diagnost-result__actions { grid-template-columns: 1fr; }
++  .diagnost-result__actions .diagnost-link-button { grid-column: auto; }
++}
++
++@media (prefers-reduced-motion: reduce) {
++  .diagnost *,
++  .diagnost *::before,
++  .diagnost *::after {
++    scroll-behavior: auto !important;
++    transition-duration: 0.01ms !important;
++  }
++}
++
++@media print {
++  .site-header,
++  .backdrop,
++  .rain,
++  .page__vignette,
++  .contact-band,
++  .site-footer,
++  .diagnost-hero,
++  .diagnost-trust,
++  .diagnost-intro,
++  .diagnost-tool,
++  .diagnost-result__actions { display: none !important; }
++  .page { padding: 0; background: #fff; }
++  .diagnost { margin: 0; max-width: none; }
++  .diagnost-result { display: block !important; margin: 0; padding: 0; border: 0; box-shadow: none; }
++  .diagnost-package { break-inside: avoid; }
++}
+diff --git a/tests/diagnost-express.test.mjs b/tests/diagnost-express.test.mjs
+new file mode 100644
+index 0000000..369defc
+--- /dev/null
++++ b/tests/diagnost-express.test.mjs
+@@ -0,0 +1,93 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++
++import { evaluateDiagnost, SCORING_VERSION } from '../src/lib/diagnost-express.mjs';
++
++const readySmall = {
++  goal: 'save_time',
++  sector: 'professional',
++  team_size: 'micro',
++  repeated_work: 'daily_heavy',
++  process_cost: 'hours',
++  process_data: 'managed',
++  task_tools: 'system',
++  process_visibility: 'documented',
++  knowledge_access: 'shared_base',
++  external_cycle: 'assigned',
++  governance: 'defined',
++  change_capacity: 'pilot_ready',
++};
++
++test('same answers always return the same result', () => {
++  assert.deepEqual(evaluateDiagnost(readySmall), evaluateDiagnost({ ...readySmall }));
++  assert.equal(evaluateDiagnost(readySmall).scoringVersion, SCORING_VERSION);
++});
++
++test('company size and sector do not inflate readiness', () => {
++  const small = evaluateDiagnost(readySmall);
++  const large = evaluateDiagnost({ ...readySmall, team_size: 'large', sector: 'production' });
++  assert.deepEqual(small.scores, large.scores);
++  assert.equal(small.route, large.route);
++});
++
++test('connected data with paper task tracking creates a contradiction', () => {
++  const result = evaluateDiagnost({
++    ...readySmall,
++    process_data: 'connected',
++    task_tools: 'verbal_paper',
++  });
++  assert.equal(result.route, 'foundation');
++  assert.ok(result.contradictions.length > 0);
++  assert.match(result.contradictions[0], /Дані описані як системні/);
++});
++
++test('many unknown answers lead to discovery instead of a fabricated score', () => {
++  const result = evaluateDiagnost({
++    ...readySmall,
++    repeated_work: 'unknown',
++    process_cost: 'unknown',
++    process_data: 'unknown',
++    task_tools: 'unknown',
++    process_visibility: 'unknown',
++    knowledge_access: 'unknown',
++  });
++  assert.equal(result.route, 'discovery');
++  assert.ok(result.evidence.percent < 67);
++  assert.equal(result.indicators[0].label, 'Недостатньо даних');
++});
++
++test('weak foundation leads to preparation, not to AI rejection', () => {
++  const result = evaluateDiagnost({
++    ...readySmall,
++    process_data: 'paper',
++    task_tools: 'verbal_paper',
++    process_visibility: 'not_documented',
++    knowledge_access: 'people',
++    external_cycle: 'none',
++    governance: 'unknown_rules',
++    change_capacity: 'interest_only',
++  });
++  assert.equal(result.route, 'foundation');
++  assert.doesNotMatch(JSON.stringify(result), /АІ вам не потрібен/i);
++});
++
++test('a prepared small organization can reach a connected route', () => {
++  const result = evaluateDiagnost(readySmall);
++  assert.equal(result.route, 'connected');
++  assert.equal(result.recommendedPackage, 'connected');
++});
++
++test('systemic route requires high opportunity, readiness and cooperation', () => {
++  const result = evaluateDiagnost({
++    ...readySmall,
++    process_data: 'connected',
++    task_tools: 'integrated',
++    process_visibility: 'measured',
++    knowledge_access: 'curated',
++    external_cycle: 'systematic',
++    governance: 'audited',
++    change_capacity: 'resources_ready',
++  });
++  assert.equal(result.route, 'systemic');
++  assert.equal(result.recommendedPackage, 'systemic');
++});
